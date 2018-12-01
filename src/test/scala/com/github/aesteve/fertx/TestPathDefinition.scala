@@ -2,50 +2,50 @@ package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.dsl.extractors.Extractor
-import com.github.aesteve.fertx.dsl.path.PathDef
-import com.github.aesteve.fertx.dsl.routing.RouteDef
+import com.github.aesteve.fertx.dsl.path.PathDefinition
+import com.github.aesteve.fertx.dsl.routing.impl.RequestReaderDefinition
 import com.github.aesteve.fertx.util._
 
 object TestPathDefinition extends App {
 
   // () => Response
   val OKUnit: () => Response = () => OK
-  val simpleStrPath: PathDef[Unit] = "api"
+  val simpleStrPath: PathDefinition[Unit] = "api"
   GET(simpleStrPath) { () =>
     OK
   }
-  GET(simpleStrPath).fold(OKUnit)
+  GET(simpleStrPath).mapUnit(OKUnit)
   GET(simpleStrPath)(OKUnit)
 
   private val OKWithArity0 = () => OK
   GET(simpleStrPath)(OKWithArity0)
   private def okWithUnit() = OK
-  GET(simpleStrPath).fold(okWithUnit)
+  GET(simpleStrPath).map(okWithUnit)
   GET(simpleStrPath)(okWithUnit)
 
   // () => Response
-  val twoStrings: PathDef[Unit] = "api" / "v1"
+  val twoStrings: PathDefinition[Unit] = "api" / "v1"
   GET(twoStrings)(() => OK)
   GET(twoStrings)(OKWithArity0)
-  GET(twoStrings).fold(okWithUnit)
+  GET(twoStrings).map(okWithUnit)
   GET(twoStrings)(okWithUnit)
 
 
   // Int => Response
-  val intParam: PathDef[Tuple1[Int]] = "api" / IntPath
-  GET(intParam) { int =>
+  val intParam: PathDefinition[Tuple1[Int]] = "api" / IntPath
+  GET("api" / IntPath) { int =>
     assert(int.isInstanceOf[Int])
     OK
   }
   private val OKWithArity1Int = { int: Int => OK }
   GET(intParam)(OKWithArity1Int)
   private def okWith1Int(i: Int) = OK
-  GET(intParam).fold(okWith1Int)
+  GET(intParam).map(okWith1Int)
   GET(intParam)(okWith1Int)
 
 
   // (Int, Int) => Response
-  val oneStringTwoInts: PathDef[(Int, Int)] = "api" / IntPath / IntPath
+  val oneStringTwoInts: PathDefinition[(Int, Int)] = "api" / IntPath / IntPath
   GET(oneStringTwoInts) { (int1, int2) =>
     assert(int1.isInstanceOf[Int])
     assert(int2.isInstanceOf[Int])
@@ -56,14 +56,14 @@ object TestPathDefinition extends App {
   private def okWith2Ints(i: Int, j: Int) = OK
   GET(oneStringTwoInts)(okWith2Ints)
 
-  val wildcardPath: PathDef[Unit] = "api" / *
+  val wildcardPath: PathDefinition[Unit] = "api" / *
   GET(wildcardPath) { () => OK }
 
   println(wildcardPath.toFullPath)
   println(wildcardPath.extractor.isInstanceOf[Extractor[Unit]])
 
 
-  val pathAndQuery: RouteDef[(Int, Int), (Int, Int, Int)] =
+  val pathAndQuery: RequestReaderDefinition[(Int, Int), (Int, Int, Int)] =
     GET("api" / IntPath / IntPath / *)
       .intQuery("someint") // mandatory
 
@@ -74,30 +74,30 @@ object TestPathDefinition extends App {
     OK
   }
 
-  val pathAndQueries: RouteDef[Unit, (Int, String)] =
+  val pathAndQueries: RequestReaderDefinition[Unit, (Int, String)] =
     GET("api" / "twoqueries")
       .intQuery("someint")
       .query("someMandatoryString")
 
-  pathAndQueries.fold { (int, str) =>
+  pathAndQueries.map { (int, str) =>
     assert(int.isInstanceOf[Int])
     assert(str.isInstanceOf[String])
     OK
   }
 
   val path = "api" / IntPath / IntPath
-  GET(path).fold { (int1, int2) =>
+  GET(path).map { (int1, int2) =>
     assert(int1.isInstanceOf[Int])
     assert(int2.isInstanceOf[Int])
     OK
   }
   val f: (Int, Int) => Response = (int1, int2) => OK
-  GET(path).fold(f)
+  GET(path).map(f)
 
   val pathWithOptQuery = "api" / "path" / "opt" / "query"
   GET(pathWithOptQuery)
       .intQueryOpt("notMandatory")
-      .fold {
+      .map {
         case Some(_) => OK
         case None => NotFound
       }
@@ -105,7 +105,7 @@ object TestPathDefinition extends App {
   GET("api" / "path" / "2" / "opt" / "queries")
     .intQueryOpt("notMandatory1")
     .intQueryOpt("notMandatory2")
-    .fold {
+    .mapTuple {
       case (Some(_), Some(_))   => OK
       case (Some(_), None)      => OK
       case (None, Some(_))      => OK
@@ -114,9 +114,12 @@ object TestPathDefinition extends App {
 
   GET("api" / "query" / "custom" / "withdefault")
     .tryQuery("test", _.map(_.toInt).getOrElse(0))
-    .fold { i: Int => OK }
+    .map { i: Int => OK }
+
+  implicit def intMarshaller: ResponseMarshaller[Int] =
+    _.toString
 
   GET("api" / "query" / "custom" / "withoutdefault")
     .tryQuery("test", _.map(_.toInt))
-    .fold(OkOrNotFound)
+    .map(OkOrNotFound)
 }

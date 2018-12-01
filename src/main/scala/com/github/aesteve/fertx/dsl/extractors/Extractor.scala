@@ -10,7 +10,7 @@ abstract class Extractor[T] {
   def getFromContext: RoutingContext => Either[ClientError, T]
 
   def &[R](other: Extractor[R])(implicit join: Join[T,R]): Extractor[join.Out] = {
-    implicit val joinProducesTuple = Tuple.yes[join.Out]
+    implicit val joinProducesTuple: Tuple[join.Out] = Tuple.yes[join.Out]
     new Extractor[join.Out]() {
       override def getFromContext: RoutingContext => Either[ClientError, join.Out] =
         rc => {

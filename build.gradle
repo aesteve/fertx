@@ -6,17 +6,11 @@ buildscript {
     ext.scala_major = '2.12'
     ext.scala_minor = '2'
     ext.scala_version = "$scala_major.$scala_minor"
+    ext.vertx_version = "3.5.0"
     // Repos
     repositories {
-        maven {
-            url 'http://nexus.osiris.withoxylane.com/content/groups/ManagedRepositories/'
-        }
-        maven {
-            url 'http://nexus.osiris.withoxylane.com/content/repositories/gradle_plugin/'
-        }
-        maven {
-            url 'http://nexus.osiris.withoxylane.com/content/repositories/jcenter/'
-        }
+        mavenCentral()
+        jcenter()
     }
     dependencies {
         // Gradle plugins
@@ -28,18 +22,18 @@ apply plugin: 'scala'
 apply plugin: 'com.github.maiflai.scalatest'
 
 repositories {
-    maven {
-        url 'http://nexus.osiris.withoxylane.com/content/groups/ManagedRepositories/'
-    }
+    mavenCentral()
 }
 
 dependencies {
     // Scala
     compile "org.scala-lang:scala-library:$scala_version"
-    compile "io.vertx:vertx-web-scala_${scala_major}:3.5.0"
+    compile "io.vertx:vertx-web-scala_${scala_major}:${vertx_version}"
 
     // Tests
     testCompile "org.scalatest:scalatest_$scala_major:3.0.4"
+    testCompile 'junit:junit:4.12'
+    testCompile "io.vertx:vertx-web-client-scala_${scala_major}:${vertx_version}"
     testRuntime "org.pegdown:pegdown:1.6.0"
 }
 
