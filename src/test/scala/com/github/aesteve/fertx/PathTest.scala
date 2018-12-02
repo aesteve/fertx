@@ -1,7 +1,7 @@
 package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl._
-import com.github.aesteve.fertx.response.{OK, ResponseMarshaller, ResponseType, TextPlain}
+import com.github.aesteve.fertx.response.{OK, ResponseType}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 

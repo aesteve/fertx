@@ -3,15 +3,11 @@ package com.github.aesteve.fertx
 import java.nio.file.Paths
 
 import com.github.aesteve.fertx.dsl._
-import com.github.aesteve.fertx.dsl.marshallers.ChunkedMarshaller
 import com.github.aesteve.fertx.response._
-import io.vertx.core.Handler
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.lang.scala.json.JsonObject
-import io.vertx.scala.core.file.{AsyncFile, OpenOptions}
+import io.vertx.scala.core.file.OpenOptions
 import io.vertx.scala.core.http.HttpServerResponse
-import io.vertx.scala.core.streams.ReadStream
 
 class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
 

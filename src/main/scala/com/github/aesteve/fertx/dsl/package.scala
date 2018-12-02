@@ -4,7 +4,7 @@ import com.github.aesteve.fertx.dsl.extractors.QueryParamExtractor
 import com.github.aesteve.fertx.dsl.path.{PathFragmentDefinition, _}
 import com.github.aesteve.fertx.dsl.routing.RouteDefinition
 import com.github.aesteve.fertx.dsl.routing.impl.RouteDefinitionImpl
-import com.github.aesteve.fertx.request.{NoContent, RequestType}
+import com.github.aesteve.fertx.request.RequestType
 import com.github.aesteve.fertx.response.{BadRequest, ClientError, NoContentErrorMarshaller, ResponseType}
 import io.vertx.core.http.HttpMethod
 

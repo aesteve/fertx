@@ -4,7 +4,7 @@ import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.response.{OK, ResponseType}
 import io.vertx.lang.scala.VertxExecutionContext
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class AsyncSpec extends FertxTestBase with SendsDefaultText {
 

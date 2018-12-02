@@ -1,7 +1,7 @@
 package com.github.aesteve.fertx
 
 import io.vertx.scala.core.Vertx
-import io.vertx.scala.core.http.{HttpClient, HttpClientOptions, HttpServer, HttpServerOptions}
+import io.vertx.scala.core.http.{HttpClient, HttpServer, HttpServerOptions}
 import io.vertx.scala.ext.web.Router
 import io.vertx.scala.ext.web.client.{WebClient, WebClientOptions}
 import org.scalatest.compatible.Assertion
