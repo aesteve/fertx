@@ -123,7 +123,7 @@ package object dsl {
 
 
 
-  implicit val strMarshaller: ResponseMarshaller[String] =
-    identity[String]
+  implicit val strMarshaller: ResponseMarshaller[TextPlain, String] =
+    (str, resp) => resp.end(str)
 
 }

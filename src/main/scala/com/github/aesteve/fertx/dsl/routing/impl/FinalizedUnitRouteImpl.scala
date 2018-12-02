@@ -2,15 +2,19 @@ package com.github.aesteve.fertx.dsl.routing.impl
 
 import com.github.aesteve.fertx.Response
 import com.github.aesteve.fertx.dsl.routing.FinalizedRoute
-import io.vertx.scala.ext.web.Router
+import io.vertx.scala.ext.web.{Route, Router}
 
 class FinalizedUnitRouteImpl[Path, In, Out](
   requestReaderDef: RequestReaderDefinition[Path, In],
   mapper: In => Out,
+  vertxHandlers: List[Route => Unit],
   responseFinalizer: () => Response
 ) extends FinalizedRoute {
 
-  override def attachTo(router: Router): Unit =
+  override def attachTo(router: Router): Unit = {
+    vertxHandlers.foreach { h =>
+      h(router.route(requestReaderDef.method, requestReaderDef.path.toFullPath))
+    }
     router.route(requestReaderDef.method, requestReaderDef.path.toFullPath)
       .handler { rc =>
         requestReaderDef.getFromContext(rc) match {
@@ -21,4 +25,5 @@ class FinalizedUnitRouteImpl[Path, In, Out](
             responseFinalizer().buildResp(rc.response)
         }
       }
+  }
 }

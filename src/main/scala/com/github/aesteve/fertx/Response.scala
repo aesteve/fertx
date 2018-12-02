@@ -2,12 +2,12 @@ package com.github.aesteve.fertx
 
 import io.vertx.scala.core.http.HttpServerResponse
 
-trait ResponseMarshaller[T] {
-  def toStr(t: T): String
-}
-
 trait Response {
   def buildResp: HttpServerResponse => Unit
+}
+
+trait ResponseMarshaller[Mime <: MimeType, Payload] {
+  def write(t: Payload, resp: HttpServerResponse)
 }
 
 private [fertx] class UnitResponse(val status: Int) extends Response {
@@ -19,11 +19,11 @@ private [fertx] class UnitResponse(val status: Int) extends Response {
 case object OK extends UnitResponse(200)
 case object NotFound extends UnitResponse(404)
 
-case class OK[T](payload: T)(implicit val marshaller: ResponseMarshaller[T]) extends Response {
+case class OK[Mime <: MimeType, Payload](payload: Payload)(implicit val marshaller: ResponseMarshaller[Mime, Payload]) extends Response {
   override def buildResp: HttpServerResponse => Unit =
     resp =>
-      resp.setStatusCode(200)
-        .end(marshaller.toStr(payload))
+      marshaller.write(payload, resp.setStatusCode(200))
+
 }
 
 

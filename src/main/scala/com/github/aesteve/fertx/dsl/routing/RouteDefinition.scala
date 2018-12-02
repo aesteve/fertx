@@ -1,3 +1,7 @@
 package com.github.aesteve.fertx.dsl.routing
 
-trait RouteDefinition[T] extends SealableRoute[T]
+import com.github.aesteve.fertx.MimeType
+
+trait RouteDefinition[T, CurrentMimeType <: MimeType] extends SealableRoute[T, CurrentMimeType] {
+  def produces[NewMime <: MimeType](mimeType: NewMime): RouteDefinition[T, NewMime]
+}

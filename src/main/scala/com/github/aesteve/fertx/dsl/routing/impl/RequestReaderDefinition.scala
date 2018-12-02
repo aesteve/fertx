@@ -5,7 +5,7 @@ import com.github.aesteve.fertx.dsl.path.PathDefinition
 import com.github.aesteve.fertx.dsl.routing.{FinalizedRoute, RouteDefinition}
 import com.github.aesteve.fertx.dsl.{IntParam, IntParamOpt, Param, StrParam, StrParamOpt}
 import com.github.aesteve.fertx.util.TupleOps.Join
-import com.github.aesteve.fertx.{BadRequest, ClientError, Response}
+import com.github.aesteve.fertx._
 import io.vertx.core.http.HttpMethod
 import io.vertx.scala.ext.web.RoutingContext
 
@@ -13,7 +13,7 @@ import scala.util.Try
 
 class RequestReaderDefinition[Path, RequestPayload]
   (val method: HttpMethod, val path: PathDefinition[Path], extractor: Extractor[RequestPayload])
-  extends Extractor[RequestPayload] with RouteDefinition[RequestPayload] {
+  extends Extractor[RequestPayload] with RouteDefinition[RequestPayload, TextPlain] {
 
   // Lifting from Request
   def lift[C](other: Extractor[C])(implicit join: Join[RequestPayload, C]): RequestReaderDefinition[Path, join.Out] =
@@ -34,7 +34,7 @@ class RequestReaderDefinition[Path, RequestPayload]
   def query(name: String)(implicit join: Join[RequestPayload, Tuple1[String]]): RequestReaderDefinition[Path, join.Out] =
     query(StrParam(name))(join)
 
-  def queryOpt(name: String)(implicit join: Join[RequestPayload, Tuple1[Option[String]]]): RequestReaderDefinition[Path, join.Out] =
+  def optQuery(name: String)(implicit join: Join[RequestPayload, Tuple1[Option[String]]]): RequestReaderDefinition[Path, join.Out] =
     query(StrParamOpt(name))(join)
 
   def intQuery(name: String)(implicit join: Join[RequestPayload, Tuple1[Int]]): RequestReaderDefinition[Path, join.Out] =
@@ -56,9 +56,13 @@ class RequestReaderDefinition[Path, RequestPayload]
   override def mapUnit(f: () => Response): FinalizedRoute =
     route.mapUnit(f)
 
+  override def produces[NewMime <: MimeType](mimeType: NewMime): RouteDefinition[RequestPayload, NewMime] =
+    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, NewMime](this, identity, mimeType)
+
   // Mapping to a Route
-  private def route: RouteDefinitionImpl[Path, RequestPayload, RequestPayload] =
-    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload](this, identity)
+  private def route: RouteDefinitionImpl[Path, RequestPayload, RequestPayload, TextPlain] =
+    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, TextPlain](this, identity, MimeType.PLAIN_TEXT)
+
 
 }
 

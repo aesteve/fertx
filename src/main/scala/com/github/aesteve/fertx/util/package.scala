@@ -2,16 +2,13 @@ package com.github.aesteve.fertx
 
 package object util {
 
-  def OkOrNotFound[T](payload: Option[T])(implicit marshaller: ResponseMarshaller[T]): Response =
-    payload.map(OK(_)).getOrElse(NotFound)
+  object PlainTextMarshallers {
 
-  object Marshallers {
+    implicit def intToStr: ResponseMarshaller[TextPlain, Int] =
+      (i, resp) => resp.end(i.toString)
 
-    implicit def intToStr: ResponseMarshaller[Int] =
-      _.toString
-
-    implicit def strToStr: ResponseMarshaller[String] =
-      s => s
+    implicit def strToStr: ResponseMarshaller[TextPlain, String] =
+      (str, resp) => resp.end(str)
 
   }
 

@@ -1,9 +1,9 @@
 package com.github.aesteve.fertx.dsl.routing
 
-import com.github.aesteve.fertx.Response
+import com.github.aesteve.fertx.{MimeType, Response}
 import com.github.aesteve.fertx.util.applyconverters.ApplyConverter
 
-trait SealableRoute[T] {
+trait SealableRoute[T, Mime <: MimeType] {
 
   def mapTuple(f: T   => Response): FinalizedRoute
   def mapUnit(f: ()  => Response): FinalizedRoute
@@ -20,10 +20,10 @@ object SealableRoute {
     def map(f: C): FinalizedRoute
   }
 
-  implicit def addApplyCapability[R](sealable: SealableRoute[R])(implicit hac: ApplyConverter[R, Response]): hac.In ⇒ FinalizedRoute =
+  implicit def addApplyCapability[R, Mime <: MimeType](sealable: SealableRoute[R, Mime])(implicit hac: ApplyConverter[R, Response]): hac.In ⇒ FinalizedRoute =
     sealable.convertApply(hac)
 
 
-  implicit def addFoldCapability[R](sealable: SealableRoute[R])(implicit hac: ApplyConverter[R, Response]): CanMapToResponse[hac.In] =
+  implicit def addFoldCapability[R, Mime <: MimeType](sealable: SealableRoute[R, Mime])(implicit hac: ApplyConverter[R, Response]): CanMapToResponse[hac.In] =
     (f: hac.In) => sealable(f)
 }

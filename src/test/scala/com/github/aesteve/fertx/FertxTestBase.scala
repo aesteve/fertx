@@ -4,7 +4,10 @@ import io.vertx.scala.core.Vertx
 import io.vertx.scala.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.scala.ext.web.Router
 import io.vertx.scala.ext.web.client.{WebClient, WebClientOptions}
+import org.scalatest.compatible.Assertion
 import org.scalatest.{Assertions, AsyncFlatSpec, BeforeAndAfter, Matchers}
+
+import scala.concurrent.Future
 
 abstract class FertxTestBase extends AsyncFlatSpec with Matchers with Assertions with BeforeAndAfter {
 
@@ -28,5 +31,11 @@ abstract class FertxTestBase extends AsyncFlatSpec with Matchers with Assertions
   after {
     vertx.close()
   }
+
+  def startTest(realTest: () => Future[Assertion]): Future[Assertion] =
+    server
+      .requestHandler(router.accept)
+      .listenFuture()
+      .flatMap[Assertion](_ => realTest())
 
 }

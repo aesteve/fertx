@@ -11,7 +11,7 @@ class PathTest extends FertxTestBase {
     GET("api" / "v1" / "health") { () =>
       OK
     }.attachTo(router)
-    server.requestHandler(router.accept).listenFuture().flatMap { res =>
+    startTest { () =>
       client.get("/api/v1/health").sendFuture().flatMap { response =>
         response.statusCode should be(200)
         client.get("nonexisting").sendFuture().map { response2 =>
@@ -28,7 +28,7 @@ class PathTest extends FertxTestBase {
     GET(serverPath) { (apiVersion, toonId) =>
       OK(s"$apiVersion$toonId")
     }.attachTo(router)
-    server.requestHandler(router.accept).listenFuture().flatMap { res =>
+    startTest { () =>
       client.get(requestPath).sendFuture().flatMap { response =>
         response.statusCode should be(200)
         response.bodyAsString() should be (Some("v13"))
@@ -46,7 +46,7 @@ class PathTest extends FertxTestBase {
     GET(serverPath ) { () =>
       OK
     }.attachTo(router)
-    server.requestHandler(router.accept).listenFuture().flatMap { res =>
+    startTest { () =>
       client.get(requestPath).sendFuture().flatMap { response =>
         response.statusCode should be(200)
         client.get("nonexisting").sendFuture().map { response2 =>
@@ -63,7 +63,7 @@ class PathTest extends FertxTestBase {
     GET(serverPath ) { () =>
       OK
     }.attachTo(router)
-    server.requestHandler(router.accept).listenFuture().flatMap { res =>
+    startTest { () =>
       client.get(requestPath).sendFuture().flatMap { response =>
         response.statusCode should be(200)
         client.get("nonexisting").sendFuture().map { response2 =>

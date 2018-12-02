@@ -4,9 +4,12 @@ import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.dsl.extractors.Extractor
 import com.github.aesteve.fertx.dsl.path.PathDefinition
 import com.github.aesteve.fertx.dsl.routing.impl.RequestReaderDefinition
-import com.github.aesteve.fertx.util._
+import com.github.aesteve.fertx.util.PlainTextMarshallers._
 
 object TestPathDefinition extends App {
+
+  // For compilation-check purpose only
+  // TODO: Add real-life test matching these
 
   // () => Response
   val OKUnit: () => Response = () => OK
@@ -105,7 +108,7 @@ object TestPathDefinition extends App {
   GET("api" / "path" / "2" / "opt" / "queries")
     .intQueryOpt("notMandatory1")
     .intQueryOpt("notMandatory2")
-    .mapTuple {
+    .map {
       case (Some(_), Some(_))   => OK
       case (Some(_), None)      => OK
       case (None, Some(_))      => OK
@@ -116,10 +119,10 @@ object TestPathDefinition extends App {
     .tryQuery("test", _.map(_.toInt).getOrElse(0))
     .map { i: Int => OK }
 
-  implicit def intMarshaller: ResponseMarshaller[Int] =
-    _.toString
-
   GET("api" / "query" / "custom" / "withoutdefault")
     .tryQuery("test", _.map(_.toInt))
-    .map(OkOrNotFound)
+    .map {
+      case Some(int) => OK(int)
+      case None => NotFound
+    }
 }
