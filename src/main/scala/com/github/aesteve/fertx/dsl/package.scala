@@ -121,10 +121,4 @@ package object dsl {
       Try(str.toInt).fold(_ => Left(BadRequest(s"Could not convert $str to Int")), i => Right(Tuple1(i)))
   }
 
-
-
-
-  implicit val strMarshaller: ResponseMarshaller[TextPlain, String] =
-    (str, resp) => resp.end(str)
-
 }

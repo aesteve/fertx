@@ -1,14 +1,14 @@
 package com.github.aesteve.fertx.dsl.routing
 
 import com.github.aesteve.fertx.dsl.{Param, StrParam, StrParamOpt}
-import com.github.aesteve.fertx.{BadRequest, ClientError, TextPlain}
+import com.github.aesteve.fertx.{BadRequest, ClientError, NoContent}
 import com.github.aesteve.fertx.dsl.extractors.{Extractor, QueryParamExtractor}
 import com.github.aesteve.fertx.util.TupleOps.Join
 
 import scala.util.Try
 
 trait RequestReaderDefinition[Path, RequestPayload]
-  extends Extractor[RequestPayload] with RouteDefinition[RequestPayload, TextPlain] {
+  extends Extractor[RequestPayload] with RouteDefinition[RequestPayload, NoContent] {
 
   /* The most generic method. Every other should rely on: just lifts data synchronously from RoutingContext using an `Extractor` */
   def lift[C](other: Extractor[C])(implicit join: Join[RequestPayload, C]): RequestReaderDefinition[Path, join.Out]

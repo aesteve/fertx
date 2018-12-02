@@ -6,23 +6,27 @@ import io.vertx.core.http.HttpHeaders
 import io.vertx.scala.ext.web.Route
 
 class RouteDefinitionImpl[Path, RequestPayload, MappedPayload, Mime <: MimeType](
-                                                                                  requestDef: RequestReaderDefinitionImpl[Path, RequestPayload],
-                                                                                  mapper: RequestPayload => MappedPayload,
-                                                                                  produces: Mime
+  requestDef: RequestReaderDefinitionImpl[Path, RequestPayload],
+  mapper: RequestPayload => MappedPayload,
+  produces: Mime
 ) extends RouteDefinition[MappedPayload, Mime] {
 
   val attachProduces: List[Route => Unit] =
-    List(
-      _.produces(produces.representation),
-      _.handler { rc =>
-        rc.response.putHeader(HttpHeaders.CONTENT_TYPE.toString, produces.representation)
-        rc.next()
-      }
-    )
+    produces.representation match {
+      case None => List()
+      case Some(repr) =>
+        List(
+          _.produces(repr),
+          _.handler { rc =>
+            rc.response.putHeader(HttpHeaders.CONTENT_TYPE.toString, repr)
+            rc.next()
+          }
+        )
+    }
 
-  override def mapTuple(f: MappedPayload => Response): FinalizedRoute =
+  override def mapTuple(f: MappedPayload => Response[Mime]): FinalizedRoute =
     new FinalizedRouteImpl(requestDef, mapper, attachProduces, f)
-  override def mapUnit(f: () => Response): FinalizedRoute =
+  override def mapUnit(f: () => Response[Mime]): FinalizedRoute =
     new FinalizedUnitRouteImpl(requestDef, mapper, List(),  f) // doesn't produce anything, since it's "Unit"
 
   //def flatMap[T](mapping: MappedPayload => Future[T]): RouteDefinition[Path, RequestPayload, T] = ???

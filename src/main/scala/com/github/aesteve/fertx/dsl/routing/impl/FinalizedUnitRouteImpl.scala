@@ -1,14 +1,14 @@
 package com.github.aesteve.fertx.dsl.routing.impl
 
-import com.github.aesteve.fertx.Response
+import com.github.aesteve.fertx.{MimeType, Response}
 import com.github.aesteve.fertx.dsl.routing.FinalizedRoute
 import io.vertx.scala.ext.web.{Route, Router}
 
-class FinalizedUnitRouteImpl[Path, In, Out](
-                                             requestReaderDef: RequestReaderDefinitionImpl[Path, In],
-                                             mapper: In => Out,
-                                             vertxHandlers: List[Route => Unit],
-                                             responseFinalizer: () => Response
+class FinalizedUnitRouteImpl[Path, In, Out, Mime <: MimeType](
+  requestReaderDef: RequestReaderDefinitionImpl[Path, In],
+  mapper: In => Out,
+  vertxHandlers: List[Route => Unit],
+  responseFinalizer: () => Response[Mime]
 ) extends FinalizedRoute {
 
   override def attachTo(router: Router): Unit = {

@@ -12,7 +12,7 @@ object TestPathDefinition extends App {
   // TODO: Add real-life test matching these
 
   // () => Response
-  val OKUnit: () => Response = () => OK
+  val OKUnit: () => Response[NoContent] = () => OK
   val simpleStrPath: PathDefinition[Unit] = "api"
   GET(simpleStrPath) { () =>
     OK
@@ -94,7 +94,7 @@ object TestPathDefinition extends App {
     assert(int2.isInstanceOf[Int])
     OK
   }
-  val f: (Int, Int) => Response = (int1, int2) => OK
+  val f: (Int, Int) => Response[NoContent] = (int1, int2) => OK
   GET(path).map(f)
 
   val pathWithOptQuery = "api" / "path" / "opt" / "query"
@@ -119,10 +119,14 @@ object TestPathDefinition extends App {
     .tryQuery("test", _.map(_.toInt).getOrElse(0))
     .map { i: Int => OK }
 
+  val IntToTextMarshaller: ResponseMarshaller[TextPlain, Int] =
+    (int, resp) => resp.end(int.toString)
+
   GET("api" / "query" / "custom" / "withoutdefault")
     .tryQuery("test", _.map(_.toInt))
+    .produces(MimeType.PLAIN_TEXT)
     .map {
-      case Some(int) => OK(int)
+      case Some(int) => OK(int)(IntToTextMarshaller)
       case None => NotFound
     }
 }

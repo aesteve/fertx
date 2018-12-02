@@ -22,12 +22,17 @@ class PathTest extends FertxTestBase {
   }
 
   "Path parameters" should "be extracted" in {
+    implicit val StringToTextMarshaller: ResponseMarshaller[TextPlain, String] =
+      (str, resp) => resp.end(str)
+
     val serverPath = "api" / StrPath / "toons" / IntPath
     val requestPath = "/api/v1/toons/3"
     requestPath should fullyMatch regex serverPath.toFullPath
-    GET(serverPath) { (apiVersion, toonId) =>
-      OK(s"$apiVersion$toonId")
-    }.attachTo(router)
+    GET(serverPath)
+      .produces(MimeType.PLAIN_TEXT)
+      .map { (apiVersion, toonId) =>
+        OK(s"$apiVersion$toonId")
+      }.attachTo(router)
     startTest { () =>
       client.get(requestPath).sendFuture().flatMap { response =>
         response.statusCode should be(200)

@@ -5,10 +5,10 @@ import com.github.aesteve.fertx.util.applyconverters.ApplyConverter
 
 trait SealableRoute[T, Mime <: MimeType] {
 
-  def mapTuple(f: T   => Response): FinalizedRoute
-  def mapUnit(f: ()  => Response): FinalizedRoute
+  def mapTuple(f: T   => Response[Mime]): FinalizedRoute
+  def mapUnit(f: ()  => Response[Mime]): FinalizedRoute
 
-  private def convertApply(implicit hac: ApplyConverter[T, Response]): hac.In => FinalizedRoute =
+  private def convertApply(implicit hac: ApplyConverter[T, Response[Mime]]): hac.In => FinalizedRoute =
     f =>
       mapTuple(hac(f))
 
@@ -20,10 +20,10 @@ object SealableRoute {
     def map(f: C): FinalizedRoute
   }
 
-  implicit def addApplyCapability[R, Mime <: MimeType](sealable: SealableRoute[R, Mime])(implicit hac: ApplyConverter[R, Response]): hac.In ⇒ FinalizedRoute =
+  implicit def addApplyCapability[R, Mime <: MimeType](sealable: SealableRoute[R, Mime])(implicit hac: ApplyConverter[R, Response[Mime]]): hac.In ⇒ FinalizedRoute =
     sealable.convertApply(hac)
 
 
-  implicit def addFoldCapability[R, Mime <: MimeType](sealable: SealableRoute[R, Mime])(implicit hac: ApplyConverter[R, Response]): CanMapToResponse[hac.In] =
+  implicit def addFoldCapability[R, Mime <: MimeType](sealable: SealableRoute[R, Mime])(implicit hac: ApplyConverter[R, Response[Mime]]): CanMapToResponse[hac.In] =
     (f: hac.In) => sealable(f)
 }

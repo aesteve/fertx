@@ -14,9 +14,10 @@ class MimeTypeSpec extends FertxTestBase {
     implicit val PlayerTextMarshaller: ResponseMarshaller[TextPlain, Player] =
       (p: Player, resp: HttpServerResponse) =>
         resp.end(s"${p.firstname}:${p.lastname}")
-    GET("some" / "text") { () =>
-      OK(Goat)
-    }.attachTo(router)
+    GET("some" / "text")
+      .produces(MimeType.PLAIN_TEXT).map { () =>
+        OK(Goat)
+      }.attachTo(router)
     startTest { () =>
       client.get("/some/text").sendFuture().map { resp =>
         resp.statusCode should be(200)

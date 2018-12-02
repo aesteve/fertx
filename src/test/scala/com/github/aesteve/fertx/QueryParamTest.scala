@@ -4,9 +4,14 @@ import com.github.aesteve.fertx.dsl._
 
 class QueryParamTest extends FertxTestBase {
 
+  implicit val StringToTextMarshaller: ResponseMarshaller[TextPlain, String] =
+    (str, resp) => resp.end(str)
+
+
   "Mandatory query param" should "not be missing" in {
     GET("api" / "mandatoryparam")
       .query("mandatoryparam")
+      .produces(MimeType.PLAIN_TEXT)
       .map { param =>
         OK(param)
       }
@@ -26,6 +31,7 @@ class QueryParamTest extends FertxTestBase {
     GET("api" / "mandatoryparams")
       .query(param1)
       .query(param2)
+      .produces(MimeType.PLAIN_TEXT)
       .map { (first, second) =>
         OK(s"$first:$second")
       }
@@ -62,6 +68,7 @@ class QueryParamTest extends FertxTestBase {
     val path = "/api/nonmandatory"
     GET("api" / "nonmandatory")
       .optQuery(paramName)
+      .produces(MimeType.PLAIN_TEXT)
       .map {
         case Some(thing) => OK(thing)
         case None => NotFound

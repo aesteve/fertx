@@ -1,15 +1,12 @@
 package com.github.aesteve.fertx.dsl.routing.impl
 
-import com.github.aesteve.fertx.dsl.extractors.{Extractor, QueryParamExtractor}
+import com.github.aesteve.fertx.dsl.extractors.Extractor
 import com.github.aesteve.fertx.dsl.path.PathDefinition
 import com.github.aesteve.fertx.dsl.routing.{FinalizedRoute, RequestReaderDefinition, RouteDefinition}
-import com.github.aesteve.fertx.dsl.{IntParam, IntParamOpt, Param, StrParam, StrParamOpt}
 import com.github.aesteve.fertx.util.TupleOps.Join
 import com.github.aesteve.fertx._
 import io.vertx.core.http.HttpMethod
 import io.vertx.scala.ext.web.RoutingContext
-
-import scala.util.Try
 
 class RequestReaderDefinitionImpl[Path, RequestPayload]
   (val method: HttpMethod, val path: PathDefinition[Path], extractor: Extractor[RequestPayload])
@@ -35,18 +32,18 @@ class RequestReaderDefinitionImpl[Path, RequestPayload]
   override def getFromContext: RoutingContext => Either[ClientError, RequestPayload] =
     extractor.getFromContext
 
-  override def mapTuple(f: RequestPayload => Response): FinalizedRoute =
+  override def mapTuple(f: RequestPayload => Response[NoContent]): FinalizedRoute =
     route.mapTuple(f)
 
-  override def mapUnit(f: () => Response): FinalizedRoute =
+  override def mapUnit(f: () => Response[NoContent]): FinalizedRoute =
     route.mapUnit(f)
 
   override def produces[NewMime <: MimeType](mimeType: NewMime): RouteDefinition[RequestPayload, NewMime] =
     new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, NewMime](this, identity, mimeType)
 
   // Mapping to a Route
-  private def route: RouteDefinitionImpl[Path, RequestPayload, RequestPayload, TextPlain] =
-    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, TextPlain](this, identity, MimeType.PLAIN_TEXT)
+  private def route: RouteDefinition[RequestPayload, NoContent] =
+    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, NoContent](this, identity, MimeType.NO_CONTENT)
 
 
 }
