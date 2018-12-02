@@ -9,6 +9,8 @@ import com.github.aesteve.fertx.util.TupleOps.Join
 import io.vertx.core.http.{HttpHeaders, HttpMethod}
 import io.vertx.scala.ext.web.{Route, RoutingContext}
 
+import scala.concurrent.Future
+
 class RouteDefinitionImpl[Path, In, RequestMime <: RequestType, ResponseMime <: ResponseType](
   val method: HttpMethod,
   val path: PathDefinition[Path],
@@ -56,6 +58,6 @@ class RouteDefinitionImpl[Path, In, RequestMime <: RequestType, ResponseMime <: 
   override def mapTuple(f: In => Response[ResponseMime]): FinalizedRoute =
     new FinalizedRouteImpl(this, attachProduces, f, errorMarshaller)
 
-  //def flatMap[T](mapping: Out => Future[T]): RouteDefinition[Path, In, T] = ???
-
+  override def flatMapTuple(f: In => Future[Response[ResponseMime]]): FinalizedRoute =
+    new AsyncFinalizedRouteImpl(this, attachProduces, f, errorMarshaller)
 }
