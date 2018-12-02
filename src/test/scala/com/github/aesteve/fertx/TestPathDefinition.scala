@@ -5,7 +5,7 @@ import com.github.aesteve.fertx.dsl.extractors.Extractor
 import com.github.aesteve.fertx.dsl.path.PathDefinition
 import com.github.aesteve.fertx.response._
 
-object TestPathDefinition extends App {
+object TestPathDefinition extends App with SendsDefaultText {
 
   // For compilation-check purpose only
   // TODO: Add real-life test matching these
@@ -16,7 +16,7 @@ object TestPathDefinition extends App {
   GET(simpleStrPath) { () =>
     OK
   }
-  GET(simpleStrPath).mapUnit(OKUnit)
+  GET(simpleStrPath).map(OKUnit)
   GET(simpleStrPath)(OKUnit)
 
   private val OKWithArity0 = () => OK

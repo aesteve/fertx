@@ -3,11 +3,7 @@ package com.github.aesteve.fertx
 import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.response._
 
-class QueryParamTest extends FertxTestBase {
-
-  implicit val StringToTextMarshaller: ResponseMarshaller[TextPlain, String] =
-    (str, resp) => resp.end(str)
-
+class QueryParamTest extends FertxTestBase with SendsDefaultText {
 
   "Mandatory query param" should "not be missing" in {
     GET("api" / "mandatoryparam")

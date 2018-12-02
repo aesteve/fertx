@@ -7,7 +7,7 @@ import io.vertx.scala.core.streams.ReadStream
 
 package object marshallers {
 
-  implicit def chunkMarshaller[T <: ReadStream[Buffer]]: ResponseMarshaller[response.Chunked, T] =
+  implicit def chunkMarshaller[T <: ReadStream[Buffer]] =
     new ChunkedMarshaller[T]
 
 

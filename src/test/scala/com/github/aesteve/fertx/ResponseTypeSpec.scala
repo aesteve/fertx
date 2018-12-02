@@ -13,7 +13,7 @@ import io.vertx.scala.core.file.{AsyncFile, OpenOptions}
 import io.vertx.scala.core.http.HttpServerResponse
 import io.vertx.scala.core.streams.ReadStream
 
-class ResponseTypeSpec extends FertxTestBase {
+class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
 
   case class Player(firstname: String, lastname: String)
   private val Goat = Player("Michael", "Jordan")
@@ -36,9 +36,21 @@ class ResponseTypeSpec extends FertxTestBase {
 
   "A Json response" should "work the same way" in {
     val createJson = (p: Player) => new JsonObject().put("firstname", p.firstname).put("lastname", p.lastname)
-    implicit val PlayerTextMarshaller: ResponseMarshaller[Json, Player] =
+    implicit val PlayerJsonMarshaller: ResponseMarshaller[Json, Player] =
       (p: Player, resp: HttpServerResponse) =>
         resp.end(createJson(p).encode())
+
+    implicit val ErrorJsonMarshaller: ErrorMarshaller[Json] = new ErrorMarshaller[Json] {
+      override def handle(resp: HttpServerResponse, clientError: ClientError): Unit =
+        resp.setStatusCode(clientError.status)
+        .end(new JsonObject().put("message", clientError.message.getOrElse("")).encode())
+
+      override def handle(resp: HttpServerResponse, error: Throwable): Unit =
+        resp.setStatusCode(500)
+          .end(new JsonObject().put("message", error.getMessage).encode())
+    }
+
+
     GET("some" / "text")
       .produces(ResponseType.JSON)
       .map { () => OK(Goat) }

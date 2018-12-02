@@ -1,13 +1,5 @@
 package com.github.aesteve.fertx.dsl
 
-import com.github.aesteve.fertx.{BadRequest, ClientError, Forbidden, Unauthorized}
-import io.vertx.scala.core.MultiMap
-import io.vertx.scala.ext.web.RoutingContext
-
-import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable
-import scala.collection.mutable.Builder
-
 package object extractors {
 
 

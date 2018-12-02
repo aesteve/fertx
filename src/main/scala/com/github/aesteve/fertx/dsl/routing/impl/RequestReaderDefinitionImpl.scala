@@ -6,7 +6,7 @@ import com.github.aesteve.fertx.dsl.routing.{FinalizedRoute, RequestReaderDefini
 import com.github.aesteve.fertx.request.RequestType
 import com.github.aesteve.fertx.util.TupleOps.Join
 import com.github.aesteve.fertx.response
-import com.github.aesteve.fertx.response.{ClientError, NoContent, Response, ResponseType}
+import com.github.aesteve.fertx.response._
 import io.vertx.core.http.HttpMethod
 import io.vertx.scala.ext.web.RoutingContext
 
@@ -40,18 +40,15 @@ class RequestReaderDefinitionImpl[Path, RequestPayload, CurrentRequestType <: Re
   override def mapTuple(f: RequestPayload => Response[response.NoContent]): FinalizedRoute =
     route.mapTuple(f)
 
-  override def mapUnit(f: () => Response[response.NoContent]): FinalizedRoute =
-    route.mapUnit(f)
-
   override def accepts[NewMime <: RequestType](mimeType: NewMime): RequestReaderDefinition[Path, RequestPayload, NewMime] =
     new RequestReaderDefinitionImpl(method, path, extractor, mimeType)
 
-  override def produces[NewMime <: ResponseType](mimeType: NewMime): RouteDefinition[RequestPayload, CurrentRequestType, NewMime] =
+  override def produces[NewMime <: ResponseType](mimeType: NewMime)(implicit errorMarshaller: ErrorMarshaller[NewMime]): RouteDefinition[RequestPayload, CurrentRequestType, NewMime] =
     route.produces(mimeType)
 
   // Mapping to a Route
   private[fertx] def route: RouteDefinition[RequestPayload, CurrentRequestType, response.NoContent] =
-    new RouteDefinitionImpl(this, identity[RequestPayload], accepts, ResponseType.NO_CONTENT)
+    new RouteDefinitionImpl(this, identity[RequestPayload], accepts, ResponseType.NO_CONTENT, NoContentErrorMarshaller)
 
 }
 

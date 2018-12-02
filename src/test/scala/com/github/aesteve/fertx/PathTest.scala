@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class PathTest extends FertxTestBase {
+class PathTest extends FertxTestBase with SendsDefaultText {
 
   "A simple path" should "be accepted" in {
     GET("api" / "v1" / "health") { () =>
@@ -23,9 +23,6 @@ class PathTest extends FertxTestBase {
   }
 
   "Path parameters" should "be extracted" in {
-    implicit val StringToTextMarshaller: ResponseMarshaller[TextPlain, String] =
-      (str, resp) => resp.end(str)
-
     val serverPath = "api" / StrPath / "toons" / IntPath
     val requestPath = "/api/v1/toons/3"
     requestPath should fullyMatch regex serverPath.toFullPath

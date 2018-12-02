@@ -6,7 +6,6 @@ import com.github.aesteve.fertx.util.applyconverters.ApplyConverter
 trait SealableRoute[T, Mime <: ResponseType] {
 
   def mapTuple(f: T   => Response[Mime]): FinalizedRoute
-  def mapUnit(f: ()  => Response[Mime]): FinalizedRoute
 
   private def convertApply(implicit hac: ApplyConverter[T, Response[Mime]]): hac.In => FinalizedRoute =
     f =>

@@ -5,23 +5,16 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.request.{RequestType, RequestUnmarshaller, TextPlain}
-import com.github.aesteve.fertx.response.{MalformedBody, OK, ResponseMarshaller, ResponseType}
+import com.github.aesteve.fertx.response._
 import io.vertx.core.buffer.Buffer
-import io.vertx.core.json.Json
-import io.vertx.scala.core.http.HttpServerResponse
+import io.vertx.lang.scala.json.JsonObject
 import io.vertx.scala.ext.web.RoutingContext
 
 
 case class FootballField(name: String)
 
 
-class BodySpec extends FertxTestBase {
-
-  implicit val textMarshaller = new ResponseMarshaller[response.TextPlain, String] {
-    override def handle(t: String, resp: HttpServerResponse): Unit =
-      resp.end(t)
-  }
-
+class BodySpec extends FertxTestBase with SendsDefaultText {
 
   "Request body" should "be read simply" in {
     implicit val textUnmarshaller = new RequestUnmarshaller[TextPlain, String] {
@@ -109,6 +102,7 @@ class BodySpec extends FertxTestBase {
         .sendBufferFuture(Buffer.buffer(""))
         .map { response =>
           response.statusCode should be(400)
+          response.bodyAsString should equal(Some("Invalid request body"))
         }
     }
   }
