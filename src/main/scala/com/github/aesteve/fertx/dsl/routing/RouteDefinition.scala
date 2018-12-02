@@ -1,7 +1,7 @@
 package com.github.aesteve.fertx.dsl.routing
 
-import com.github.aesteve.fertx.MimeType
+import com.github.aesteve.fertx.ResponseType
 
-trait RouteDefinition[T, CurrentMimeType <: MimeType] extends SealableRoute[T, CurrentMimeType] {
-  def produces[NewMime <: MimeType](mimeType: NewMime): RouteDefinition[T, NewMime]
+trait RouteDefinition[T, CurrentMimeType <: ResponseType] extends SealableRoute[T, CurrentMimeType] {
+  def produces[NewMime <: ResponseType](mimeType: NewMime): RouteDefinition[T, NewMime]
 }

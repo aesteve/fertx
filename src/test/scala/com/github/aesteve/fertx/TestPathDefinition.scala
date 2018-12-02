@@ -124,7 +124,7 @@ object TestPathDefinition extends App {
 
   GET("api" / "query" / "custom" / "withoutdefault")
     .tryQuery("test", _.map(_.toInt))
-    .produces(MimeType.PLAIN_TEXT)
+    .produces(ResponseType.PLAIN_TEXT)
     .map {
       case Some(int) => OK(int)(IntToTextMarshaller)
       case None => NotFound

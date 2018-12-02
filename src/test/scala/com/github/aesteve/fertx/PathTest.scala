@@ -29,7 +29,7 @@ class PathTest extends FertxTestBase {
     val requestPath = "/api/v1/toons/3"
     requestPath should fullyMatch regex serverPath.toFullPath
     GET(serverPath)
-      .produces(MimeType.PLAIN_TEXT)
+      .produces(ResponseType.PLAIN_TEXT)
       .map { (apiVersion, toonId) =>
         OK(s"$apiVersion$toonId")
       }.attachTo(router)

@@ -1,11 +1,11 @@
 package com.github.aesteve.fertx.dsl.routing.impl
 
 import com.github.aesteve.fertx.dsl.routing.{FinalizedRoute, RouteDefinition}
-import com.github.aesteve.fertx.{MimeType, Response}
+import com.github.aesteve.fertx.{ResponseType, Response}
 import io.vertx.core.http.HttpHeaders
 import io.vertx.scala.ext.web.Route
 
-class RouteDefinitionImpl[Path, RequestPayload, MappedPayload, Mime <: MimeType](
+class RouteDefinitionImpl[Path, RequestPayload, MappedPayload, Mime <: ResponseType](
   requestDef: RequestReaderDefinitionImpl[Path, RequestPayload],
   mapper: RequestPayload => MappedPayload,
   produces: Mime
@@ -30,6 +30,6 @@ class RouteDefinitionImpl[Path, RequestPayload, MappedPayload, Mime <: MimeType]
     new FinalizedUnitRouteImpl(requestDef, mapper, List(),  f) // doesn't produce anything, since it's "Unit"
 
   //def flatMap[T](mapping: MappedPayload => Future[T]): RouteDefinition[Path, RequestPayload, T] = ???
-  override def produces[NewMime <: MimeType](mimeType: NewMime): RouteDefinition[MappedPayload, NewMime] =
+  override def produces[NewMime <: ResponseType](mimeType: NewMime): RouteDefinition[MappedPayload, NewMime] =
     new RouteDefinitionImpl[Path, RequestPayload, MappedPayload, NewMime](requestDef, mapper, mimeType)
 }

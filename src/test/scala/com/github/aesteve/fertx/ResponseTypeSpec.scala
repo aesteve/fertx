@@ -12,7 +12,7 @@ import io.vertx.scala.core.file.{AsyncFile, OpenOptions}
 import io.vertx.scala.core.http.HttpServerResponse
 import io.vertx.scala.core.streams.ReadStream
 
-class MimeTypeSpec extends FertxTestBase {
+class ResponseTypeSpec extends FertxTestBase {
 
   case class Player(firstname: String, lastname: String)
   private val Goat = Player("Michael", "Jordan")
@@ -22,7 +22,7 @@ class MimeTypeSpec extends FertxTestBase {
       (p: Player, resp: HttpServerResponse) =>
         resp.end(s"${p.firstname}:${p.lastname}")
     GET("some" / "text")
-      .produces(MimeType.PLAIN_TEXT).map { () =>
+      .produces(ResponseType.PLAIN_TEXT).map { () =>
         OK(Goat)
       }.attachTo(router)
     startTest { () =>
@@ -39,13 +39,13 @@ class MimeTypeSpec extends FertxTestBase {
       (p: Player, resp: HttpServerResponse) =>
         resp.end(createJson(p).encode())
     GET("some" / "text")
-      .produces(MimeType.JSON)
+      .produces(ResponseType.JSON)
       .map { () => OK(Goat) }
       .attachTo(router)
     startTest { () =>
       client.get("/some/text").sendFuture().map { resp =>
         resp.statusCode should be(200)
-        resp.getHeader(HttpHeaders.CONTENT_TYPE.toString) should equal(MimeType.JSON.representation)
+        resp.getHeader(HttpHeaders.CONTENT_TYPE.toString) should equal(ResponseType.JSON.representation)
         resp.bodyAsJsonObject should equal(Some(createJson(Goat)))
       }
     }
@@ -57,7 +57,7 @@ class MimeTypeSpec extends FertxTestBase {
       file.setReadBufferSize(100)
       import com.github.aesteve.fertx.dsl.marshallers.chunkMarshaller
       GET("chunked")
-        .produces(MimeType.CHUNKED)
+        .produces(ResponseType.CHUNKED)
         .map { () => OK(file) }
         .attachTo(router)
       startTest { () =>

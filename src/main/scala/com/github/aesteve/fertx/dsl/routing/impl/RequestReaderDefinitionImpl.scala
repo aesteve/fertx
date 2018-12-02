@@ -38,12 +38,12 @@ class RequestReaderDefinitionImpl[Path, RequestPayload]
   override def mapUnit(f: () => Response[NoContent]): FinalizedRoute =
     route.mapUnit(f)
 
-  override def produces[NewMime <: MimeType](mimeType: NewMime): RouteDefinition[RequestPayload, NewMime] =
+  override def produces[NewMime <: ResponseType](mimeType: NewMime): RouteDefinition[RequestPayload, NewMime] =
     new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, NewMime](this, identity, mimeType)
 
   // Mapping to a Route
   private def route: RouteDefinition[RequestPayload, NoContent] =
-    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, NoContent](this, identity, MimeType.NO_CONTENT)
+    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, NoContent](this, identity, ResponseType.NO_CONTENT)
 
 
 }

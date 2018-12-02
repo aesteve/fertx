@@ -1,10 +1,10 @@
 package com.github.aesteve.fertx.dsl.routing.impl
 
-import com.github.aesteve.fertx.{MimeType, Response}
+import com.github.aesteve.fertx.{ResponseType, Response}
 import com.github.aesteve.fertx.dsl.routing.FinalizedRoute
 import io.vertx.scala.ext.web.{Route, Router}
 
-class FinalizedUnitRouteImpl[Path, In, Out, Mime <: MimeType](
+class FinalizedUnitRouteImpl[Path, In, Out, Mime <: ResponseType](
   requestReaderDef: RequestReaderDefinitionImpl[Path, In],
   mapper: In => Out,
   vertxHandlers: List[Route => Unit],
