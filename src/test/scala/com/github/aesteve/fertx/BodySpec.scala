@@ -7,7 +7,6 @@ import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.request.{RequestType, RequestUnmarshaller, TextPlain}
 import com.github.aesteve.fertx.response._
 import io.vertx.core.buffer.Buffer
-import io.vertx.lang.scala.json.JsonObject
 import io.vertx.scala.ext.web.RoutingContext
 
 
@@ -56,8 +55,8 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
 
     POST("api" / "fields")
       .accepts(RequestType.JSON)
-      .body[FootballField]
       .produces(ResponseType.PLAIN_TEXT)
+      .body[FootballField]
       .map(field =>
         OK(field.name)
       )
@@ -88,8 +87,8 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
 
     POST("api" / "fields" / "invalid")
       .accepts(RequestType.JSON)
-      .body[FootballField]
       .produces(ResponseType.PLAIN_TEXT)
+      .body[FootballField]
       .map(field =>
         OK(field.name)
       )

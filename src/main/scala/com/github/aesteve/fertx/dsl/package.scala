@@ -2,10 +2,10 @@ package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl.extractors.QueryParamExtractor
 import com.github.aesteve.fertx.dsl.path.{PathFragmentDefinition, _}
-import com.github.aesteve.fertx.dsl.routing.RequestReaderDefinition
-import com.github.aesteve.fertx.dsl.routing.impl.RequestReaderDefinitionImpl
+import com.github.aesteve.fertx.dsl.routing.RouteDefinition
+import com.github.aesteve.fertx.dsl.routing.impl.RouteDefinitionImpl
 import com.github.aesteve.fertx.request.{NoContent, RequestType}
-import com.github.aesteve.fertx.response.{BadRequest, ClientError}
+import com.github.aesteve.fertx.response.{BadRequest, ClientError, NoContentErrorMarshaller, ResponseType}
 import io.vertx.core.http.HttpMethod
 
 import scala.util.Try
@@ -16,11 +16,11 @@ package object dsl {
   type PathFragDef1[T] = PathFragmentDefinition[Tuple1[T]]
   type QueryParam1[T] = QueryParamExtractor[Tuple1[T]]
 
-  def GET[T](pathDef: PathDefinition[T]): RequestReaderDefinition[T, T, NoContent] =
-    new RequestReaderDefinitionImpl(HttpMethod.GET, pathDef, pathDef.extractor, RequestType.NO_CONTENT)
+  def GET[T](pathDef: PathDefinition[T]): RouteDefinition[T, request.NoContent, response.NoContent] =
+    new RouteDefinitionImpl(HttpMethod.GET, pathDef, pathDef.extractor, RequestType.NO_CONTENT, ResponseType.NO_CONTENT, NoContentErrorMarshaller)
 
-  def POST[T](pathDef: PathDefinition[T]): RequestReaderDefinition[T, T, NoContent] =
-    new RequestReaderDefinitionImpl(HttpMethod.POST, pathDef, pathDef.extractor, RequestType.NO_CONTENT)
+  def POST[T](pathDef: PathDefinition[T]): RouteDefinition[T, request.NoContent, response.NoContent] =
+    new RouteDefinitionImpl(HttpMethod.POST, pathDef, pathDef.extractor, RequestType.NO_CONTENT, ResponseType.NO_CONTENT, NoContentErrorMarshaller)
 
 
   object * extends PathFragDef0 {

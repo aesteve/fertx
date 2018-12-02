@@ -6,16 +6,15 @@ import com.github.aesteve.fertx.response.{ErrorMarshaller, Response, ResponseTyp
 import io.vertx.scala.ext.web.handler.BodyHandler
 import io.vertx.scala.ext.web.{Route, Router}
 
-class FinalizedRouteImpl[Path, In, Out, BodyMime <: RequestType, ResponseMime <: ResponseType](
-  requestReaderDef: RequestReaderDefinitionImpl[Path, In, BodyMime],
-  mapper: In => Out,
+class FinalizedRouteImpl[Path, In, RequestMime <: RequestType, ResponseMime <: ResponseType](
+  routeDefinition: RouteDefinitionImpl[Path, In, RequestMime, ResponseMime],
   vertxHandlers: List[Route => Unit],
-  responseFinalizer: Out => Response[ResponseMime],
+  responseFinalizer: In => Response[ResponseMime],
   errorMarshaller: ErrorMarshaller[ResponseMime]
 ) extends FinalizedRoute {
 
   override def attachTo(router: Router): Unit = {
-    if (requestReaderDef.extractor.needsBody) {
+    if (routeDefinition.extractor.needsBody) {
       createRoute(router).handler(BodyHandler.create())
     }
     vertxHandlers.foreach { h =>
@@ -26,15 +25,15 @@ class FinalizedRouteImpl[Path, In, Out, BodyMime <: RequestType, ResponseMime <:
     }
     createRoute(router)
       .handler { rc =>
-        requestReaderDef.getFromContext(rc) match {
+        routeDefinition.getFromContext(rc) match {
           case Left(clientError) =>
             errorMarshaller.handle(rc.response, clientError)
           case Right(payload) =>
-            mapper.andThen(responseFinalizer)(payload).buildResp(rc.response)
+            responseFinalizer(payload).buildResp(rc.response)
         }
       }
   }
 
   private def createRoute(router: Router): Route =
-    router.routeWithRegex(requestReaderDef.method, requestReaderDef.path.toFullPath)
+    router.routeWithRegex(routeDefinition.method, routeDefinition.path.toFullPath)
 }
