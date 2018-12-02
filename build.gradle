@@ -34,6 +34,7 @@ dependencies {
     testCompile "org.scalatest:scalatest_$scala_major:3.0.4"
     testCompile 'junit:junit:4.12'
     testCompile "io.vertx:vertx-web-client-scala_${scala_major}:${vertx_version}"
+    testCompile "com.fasterxml.jackson.module:jackson-module-scala_${scala_major}:2.9.7"
     testRuntime "org.pegdown:pegdown:1.6.0"
 }
 

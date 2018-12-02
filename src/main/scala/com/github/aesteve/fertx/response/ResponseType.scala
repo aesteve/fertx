@@ -1,4 +1,4 @@
-package com.github.aesteve.fertx
+package com.github.aesteve.fertx.response
 
 abstract class ResponseType(val representation: Option[String])
 final class TextPlain extends ResponseType(Some("text/plain"))

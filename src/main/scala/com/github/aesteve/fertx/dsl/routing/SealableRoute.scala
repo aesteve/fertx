@@ -1,6 +1,6 @@
 package com.github.aesteve.fertx.dsl.routing
 
-import com.github.aesteve.fertx.{ResponseType, Response}
+import com.github.aesteve.fertx.response.{Response, ResponseType}
 import com.github.aesteve.fertx.util.applyconverters.ApplyConverter
 
 trait SealableRoute[T, Mime <: ResponseType] {

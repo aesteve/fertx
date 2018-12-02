@@ -1,6 +1,6 @@
 package com.github.aesteve.fertx.dsl.path
 
-import com.github.aesteve.fertx.ClientError
+import com.github.aesteve.fertx.response.ClientError
 import com.github.aesteve.fertx.dsl.extractors.Extractor
 import io.vertx.scala.ext.web.RoutingContext
 

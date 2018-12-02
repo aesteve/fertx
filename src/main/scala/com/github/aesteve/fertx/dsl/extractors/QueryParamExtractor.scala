@@ -1,6 +1,6 @@
 package com.github.aesteve.fertx.dsl.extractors
 
-import com.github.aesteve.fertx.ClientError
+import com.github.aesteve.fertx.response.ClientError
 import io.vertx.scala.ext.web.RoutingContext
 
 abstract class QueryParamExtractor[T](name: String) extends Extractor[T] {

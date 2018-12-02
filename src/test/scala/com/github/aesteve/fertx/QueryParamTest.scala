@@ -1,6 +1,7 @@
 package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl._
+import com.github.aesteve.fertx.response._
 
 class QueryParamTest extends FertxTestBase {
 

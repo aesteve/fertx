@@ -3,18 +3,23 @@ package com.github.aesteve.fertx.dsl.routing.impl
 import com.github.aesteve.fertx.dsl.extractors.Extractor
 import com.github.aesteve.fertx.dsl.path.PathDefinition
 import com.github.aesteve.fertx.dsl.routing.{FinalizedRoute, RequestReaderDefinition, RouteDefinition}
+import com.github.aesteve.fertx.request.RequestType
 import com.github.aesteve.fertx.util.TupleOps.Join
-import com.github.aesteve.fertx._
+import com.github.aesteve.fertx.response
+import com.github.aesteve.fertx.response.{ClientError, NoContent, Response, ResponseType}
 import io.vertx.core.http.HttpMethod
 import io.vertx.scala.ext.web.RoutingContext
 
-class RequestReaderDefinitionImpl[Path, RequestPayload]
-  (val method: HttpMethod, val path: PathDefinition[Path], extractor: Extractor[RequestPayload])
-  extends RequestReaderDefinition[Path, RequestPayload] {
+class RequestReaderDefinitionImpl[Path, RequestPayload, CurrentRequestType <: RequestType](
+  val method: HttpMethod,
+  val path: PathDefinition[Path],
+  val extractor: Extractor[RequestPayload],
+  val accepts: CurrentRequestType
+) extends RequestReaderDefinition[Path, RequestPayload, CurrentRequestType] {
 
   // Lifting from Request
-  override def lift[C](other: Extractor[C])(implicit join: Join[RequestPayload, C]): RequestReaderDefinition[Path, join.Out] =
-    new RequestReaderDefinitionImpl[Path, join.Out](method, path, (extractor & other)(join))
+  override def lift[C](other: Extractor[C])(implicit join: Join[RequestPayload, C]): RequestReaderDefinition[Path, join.Out, CurrentRequestType] =
+    new RequestReaderDefinitionImpl(method, path, (extractor & other)(join), accepts)
 
 /*
 
@@ -32,19 +37,21 @@ class RequestReaderDefinitionImpl[Path, RequestPayload]
   override def getFromContext: RoutingContext => Either[ClientError, RequestPayload] =
     extractor.getFromContext
 
-  override def mapTuple(f: RequestPayload => Response[NoContent]): FinalizedRoute =
+  override def mapTuple(f: RequestPayload => Response[response.NoContent]): FinalizedRoute =
     route.mapTuple(f)
 
-  override def mapUnit(f: () => Response[NoContent]): FinalizedRoute =
+  override def mapUnit(f: () => Response[response.NoContent]): FinalizedRoute =
     route.mapUnit(f)
 
-  override def produces[NewMime <: ResponseType](mimeType: NewMime): RouteDefinition[RequestPayload, NewMime] =
-    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, NewMime](this, identity, mimeType)
+  override def accepts[NewMime <: RequestType](mimeType: NewMime): RequestReaderDefinition[Path, RequestPayload, NewMime] =
+    new RequestReaderDefinitionImpl(method, path, extractor, mimeType)
+
+  override def produces[NewMime <: ResponseType](mimeType: NewMime): RouteDefinition[RequestPayload, CurrentRequestType, NewMime] =
+    route.produces(mimeType)
 
   // Mapping to a Route
-  private def route: RouteDefinition[RequestPayload, NoContent] =
-    new RouteDefinitionImpl[Path, RequestPayload, RequestPayload, NoContent](this, identity, ResponseType.NO_CONTENT)
-
+  private[fertx] def route: RouteDefinition[RequestPayload, CurrentRequestType, response.NoContent] =
+    new RouteDefinitionImpl(this, identity[RequestPayload], accepts, ResponseType.NO_CONTENT)
 
 }
 

@@ -3,8 +3,7 @@ package com.github.aesteve.fertx
 import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.dsl.extractors.Extractor
 import com.github.aesteve.fertx.dsl.path.PathDefinition
-import com.github.aesteve.fertx.dsl.routing.RequestReaderDefinition
-import com.github.aesteve.fertx.util.PlainTextMarshallers._
+import com.github.aesteve.fertx.response._
 
 object TestPathDefinition extends App {
 
@@ -12,7 +11,7 @@ object TestPathDefinition extends App {
   // TODO: Add real-life test matching these
 
   // () => Response
-  val OKUnit: () => Response[NoContent] = () => OK
+  val OKUnit: () => Response[response.NoContent] = () => OK
   val simpleStrPath: PathDefinition[Unit] = "api"
   GET(simpleStrPath) { () =>
     OK
@@ -66,7 +65,7 @@ object TestPathDefinition extends App {
   println(wildcardPath.extractor.isInstanceOf[Extractor[Unit]])
 
 
-  val pathAndQuery: RequestReaderDefinition[(Int, Int), (Int, Int, String)] =
+  val pathAndQuery =
     GET("api" / IntPath / IntPath / *)
       .query("someint") // mandatory
 
@@ -77,7 +76,7 @@ object TestPathDefinition extends App {
     OK
   }
 
-  val pathAndQueries: RequestReaderDefinition[Unit, (String, String)] =
+  val pathAndQueries =
     GET("api" / "twoqueries")
       .query("someint")
       .query("someMandatoryString")
@@ -94,7 +93,7 @@ object TestPathDefinition extends App {
     assert(int2.isInstanceOf[Int])
     OK
   }
-  val f: (Int, Int) => Response[NoContent] = (int1, int2) => OK
+  val f: (Int, Int) => Response[response.NoContent] = (int1, int2) => OK
   GET(path).map(f)
 
   val pathWithOptQuery = "api" / "path" / "opt" / "query"

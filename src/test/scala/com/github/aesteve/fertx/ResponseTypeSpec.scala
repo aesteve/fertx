@@ -4,6 +4,7 @@ import java.nio.file.Paths
 
 import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.dsl.marshallers.ChunkedMarshaller
+import com.github.aesteve.fertx.response._
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders

@@ -1,4 +1,4 @@
-package com.github.aesteve.fertx
+package com.github.aesteve.fertx.response
 
 import io.vertx.scala.core.http.HttpServerResponse
 
