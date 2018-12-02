@@ -2,7 +2,8 @@ package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl.extractors.QueryParamExtractor
 import com.github.aesteve.fertx.dsl.path.{PathFragmentDefinition, _}
-import com.github.aesteve.fertx.dsl.routing.impl.RequestReaderDefinition
+import com.github.aesteve.fertx.dsl.routing.RequestReaderDefinition
+import com.github.aesteve.fertx.dsl.routing.impl.RequestReaderDefinitionImpl
 import io.vertx.core.http.HttpMethod
 
 import scala.util.Try
@@ -14,10 +15,10 @@ package object dsl {
   type QueryParam1[T] = QueryParamExtractor[Tuple1[T]]
 
   def GET[T](pathDef: PathDefinition[T]): RequestReaderDefinition[T, T] =
-    new RequestReaderDefinition[T, T](HttpMethod.GET, pathDef, pathDef.extractor)
+    new RequestReaderDefinitionImpl[T, T](HttpMethod.GET, pathDef, pathDef.extractor)
 
   def POST[T](pathDef: PathDefinition[T]): RequestReaderDefinition[T, T] =
-    new RequestReaderDefinition[T, T](HttpMethod.POST, pathDef, pathDef.extractor)
+    new RequestReaderDefinitionImpl[T, T](HttpMethod.POST, pathDef, pathDef.extractor)
 
 
   object * extends PathFragDef0 {

@@ -5,10 +5,10 @@ import com.github.aesteve.fertx.dsl.routing.FinalizedRoute
 import io.vertx.scala.ext.web.{Route, Router}
 
 class FinalizedUnitRouteImpl[Path, In, Out](
-  requestReaderDef: RequestReaderDefinition[Path, In],
-  mapper: In => Out,
-  vertxHandlers: List[Route => Unit],
-  responseFinalizer: () => Response
+                                             requestReaderDef: RequestReaderDefinitionImpl[Path, In],
+                                             mapper: In => Out,
+                                             vertxHandlers: List[Route => Unit],
+                                             responseFinalizer: () => Response
 ) extends FinalizedRoute {
 
   override def attachTo(router: Router): Unit = {

@@ -3,7 +3,7 @@ package com.github.aesteve.fertx
 import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.dsl.extractors.Extractor
 import com.github.aesteve.fertx.dsl.path.PathDefinition
-import com.github.aesteve.fertx.dsl.routing.impl.RequestReaderDefinition
+import com.github.aesteve.fertx.dsl.routing.RequestReaderDefinition
 import com.github.aesteve.fertx.util.PlainTextMarshallers._
 
 object TestPathDefinition extends App {
@@ -66,24 +66,24 @@ object TestPathDefinition extends App {
   println(wildcardPath.extractor.isInstanceOf[Extractor[Unit]])
 
 
-  val pathAndQuery: RequestReaderDefinition[(Int, Int), (Int, Int, Int)] =
+  val pathAndQuery: RequestReaderDefinition[(Int, Int), (Int, Int, String)] =
     GET("api" / IntPath / IntPath / *)
-      .intQuery("someint") // mandatory
+      .query("someint") // mandatory
 
   pathAndQuery { (int1, int2, int3) =>
     assert(int1.isInstanceOf[Int])
     assert(int2.isInstanceOf[Int])
-    assert(int3.isInstanceOf[Int])
+    assert(int3.isInstanceOf[String])
     OK
   }
 
-  val pathAndQueries: RequestReaderDefinition[Unit, (Int, String)] =
+  val pathAndQueries: RequestReaderDefinition[Unit, (String, String)] =
     GET("api" / "twoqueries")
-      .intQuery("someint")
+      .query("someint")
       .query("someMandatoryString")
 
   pathAndQueries.map { (int, str) =>
-    assert(int.isInstanceOf[Int])
+    assert(int.isInstanceOf[String])
     assert(str.isInstanceOf[String])
     OK
   }
@@ -99,15 +99,15 @@ object TestPathDefinition extends App {
 
   val pathWithOptQuery = "api" / "path" / "opt" / "query"
   GET(pathWithOptQuery)
-      .intQueryOpt("notMandatory")
+      .optQuery("notMandatory")
       .map {
         case Some(_) => OK
         case None => NotFound
       }
 
   GET("api" / "path" / "2" / "opt" / "queries")
-    .intQueryOpt("notMandatory1")
-    .intQueryOpt("notMandatory2")
+    .optQuery("notMandatory1")
+    .optQuery("notMandatory2")
     .map {
       case (Some(_), Some(_))   => OK
       case (Some(_), None)      => OK

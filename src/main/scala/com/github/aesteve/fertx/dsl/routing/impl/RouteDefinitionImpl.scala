@@ -6,9 +6,9 @@ import io.vertx.core.http.HttpHeaders
 import io.vertx.scala.ext.web.Route
 
 class RouteDefinitionImpl[Path, RequestPayload, MappedPayload, Mime <: MimeType](
-  requestDef: RequestReaderDefinition[Path, RequestPayload],
-  mapper: RequestPayload => MappedPayload,
-  produces: Mime
+                                                                                  requestDef: RequestReaderDefinitionImpl[Path, RequestPayload],
+                                                                                  mapper: RequestPayload => MappedPayload,
+                                                                                  produces: Mime
 ) extends RouteDefinition[MappedPayload, Mime] {
 
   val attachProduces: List[Route => Unit] =
