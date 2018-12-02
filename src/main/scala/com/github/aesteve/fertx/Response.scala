@@ -7,7 +7,7 @@ trait Response[-Mime <: MimeType] {
 }
 
 trait ResponseMarshaller[-Mime <: MimeType, Payload] {
-  def write(t: Payload, resp: HttpServerResponse)
+  def handle(t: Payload, resp: HttpServerResponse)
 }
 
 private [fertx] class UnitResponse(val status: Int) extends Response[MimeType] {
@@ -22,7 +22,7 @@ case object NotFound extends UnitResponse(404)
 case class OK[Mime <: MimeType, Payload](payload: Payload)(implicit val marshaller: ResponseMarshaller[Mime, Payload]) extends Response[Mime] {
   override def buildResp: HttpServerResponse => Unit =
     resp =>
-      marshaller.write(payload, resp.setStatusCode(200))
+      marshaller.handle(payload, resp.setStatusCode(200))
 
 }
 

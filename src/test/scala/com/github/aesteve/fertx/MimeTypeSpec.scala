@@ -1,9 +1,16 @@
 package com.github.aesteve.fertx
 
+import java.nio.file.Paths
+
 import com.github.aesteve.fertx.dsl._
+import com.github.aesteve.fertx.dsl.marshallers.ChunkedMarshaller
+import io.vertx.core.Handler
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.lang.scala.json.JsonObject
+import io.vertx.scala.core.file.{AsyncFile, OpenOptions}
 import io.vertx.scala.core.http.HttpServerResponse
+import io.vertx.scala.core.streams.ReadStream
 
 class MimeTypeSpec extends FertxTestBase {
 
@@ -38,10 +45,30 @@ class MimeTypeSpec extends FertxTestBase {
     startTest { () =>
       client.get("/some/text").sendFuture().map { resp =>
         resp.statusCode should be(200)
-        resp.getHeader(HttpHeaders.CONTENT_TYPE.toString) should be(Some(MimeType.JSON.representation))
+        resp.getHeader(HttpHeaders.CONTENT_TYPE.toString) should equal(MimeType.JSON.representation)
         resp.bodyAsJsonObject should equal(Some(createJson(Goat)))
       }
     }
+  }
+
+  "A chunked response" should "be possible" in {
+    val path = Paths.get(ClassLoader.getSystemResource("1000lines.txt").toURI).toAbsolutePath
+    vertx.fileSystem().openFuture(path.toString, OpenOptions().setRead(true)).flatMap { file =>
+      file.setReadBufferSize(100)
+      import com.github.aesteve.fertx.dsl.marshallers.chunkMarshaller
+      GET("chunked")
+        .produces(MimeType.CHUNKED)
+        .map { () => OK(file) }
+        .attachTo(router)
+      startTest { () =>
+        client.get("/chunked").sendFuture().map { resp =>
+          resp.statusCode should be(200)
+          resp.body should not be empty
+          resp.body.get.length should be > 100
+        }
+      }
+    }
+
   }
 
 }

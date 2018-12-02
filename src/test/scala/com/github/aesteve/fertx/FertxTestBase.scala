@@ -1,7 +1,7 @@
 package com.github.aesteve.fertx
 
 import io.vertx.scala.core.Vertx
-import io.vertx.scala.core.http.{HttpServer, HttpServerOptions}
+import io.vertx.scala.core.http.{HttpClient, HttpClientOptions, HttpServer, HttpServerOptions}
 import io.vertx.scala.ext.web.Router
 import io.vertx.scala.ext.web.client.{WebClient, WebClientOptions}
 import org.scalatest.compatible.Assertion
@@ -20,6 +20,7 @@ abstract class FertxTestBase extends AsyncFlatSpec with Matchers with Assertions
   protected var server: HttpServer = _
   protected var router: Router = _
   protected var client: WebClient = _
+  protected var httpClient: HttpClient = _
 
   before {
     vertx = Vertx.vertx
