@@ -106,4 +106,40 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
     }
   }
 
+  "Both body and params" should "both be accessible" in {
+    val sent = "something"
+    val path = "42"
+    val queryParam = "qparam"
+    val queryValue = "qvalue"
+
+    implicit val textUnmarshaller = new RequestUnmarshaller[TextPlain, String] {
+      override def extract(rc: RoutingContext): Either[MalformedBody, String] =
+        Right(rc.getBodyAsString.get)
+    }
+
+    POST("api" / "bodyandparams" / IntPath)
+      .accepts(RequestType.PLAIN_TEXT)
+      .produces(ResponseType.PLAIN_TEXT)
+      .query(queryParam)
+      .body[String]
+      .map { (id, query, body) =>
+        assert(id.isInstanceOf[Int])
+        assert(query.isInstanceOf[String])
+        assert(body.isInstanceOf[String])
+        OK(s"$id:$query:$body")
+      }
+      .attachTo(router)
+
+    startTest { () =>
+      client.post(s"/api/bodyandparams/$path")
+        .addQueryParam(queryParam, queryValue)
+        .putHeader("Content-Type", "text/plain")
+        .sendBufferFuture(Buffer.buffer(sent))
+        .map { resp =>
+          resp.statusCode should be(200)
+          resp.bodyAsString.get should equal(s"$path:$queryValue:$sent")
+        }
+    }
+  }
+
 }
