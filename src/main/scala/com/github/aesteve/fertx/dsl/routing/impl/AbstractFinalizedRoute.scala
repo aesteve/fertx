@@ -3,6 +3,8 @@ package com.github.aesteve.fertx.dsl.routing.impl
 import com.github.aesteve.fertx.dsl.routing.FinalizedRoute
 import com.github.aesteve.fertx.request.RequestType
 import com.github.aesteve.fertx.response.{ErrorMarshaller, ResponseType}
+import com.timeout.docless.swagger.{Operation, Path => SwaggerPath}
+import io.vertx.core.http.HttpMethod
 import io.vertx.scala.ext.web.handler.BodyHandler
 import io.vertx.scala.ext.web.{Route, Router, RoutingContext}
 
@@ -12,6 +14,15 @@ abstract class AbstractFinalizedRoute[Path, In, RequestMime <: RequestType, Resp
   errorMarshaller: ErrorMarshaller[ResponseMime]
 ) extends FinalizedRoute {
 
+  private val operations: Map[HttpMethod, SwaggerPath => Operation => SwaggerPath] = Map(
+    HttpMethod.GET -> { _.Get },
+    HttpMethod.POST -> { _.Post },
+    HttpMethod.PUT -> { _.Put },
+    HttpMethod.DELETE -> { _.Delete },
+    HttpMethod.OPTIONS -> { _.Options },
+    HttpMethod.HEAD -> { _.Head },
+    HttpMethod.PATCH -> { _.Patch }
+  )
 
   override def attachTo(router: Router): Unit = {
     if (routeDefinition.extractor.needsBody) {
@@ -33,6 +44,11 @@ abstract class AbstractFinalizedRoute[Path, In, RequestMime <: RequestType, Resp
         }
       }
   }
+
+  override def openAPIOperation: SwaggerPath =
+    operations(routeDefinition.method)(SwaggerPath(routeDefinition.path.toFullPath))(
+      routeDefinition.buildOpenAPI(Operation())
+    )
 
   protected def invokeMapper(payload: In, rc: RoutingContext): Unit
 

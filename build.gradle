@@ -29,6 +29,10 @@ dependencies {
     // Scala
     compile "org.scala-lang:scala-library:$scala_version"
     compile "io.vertx:vertx-web-scala_${scala_major}:${vertx_version}"
+    // compile 'io.swagger.core.v3:swagger-core:2.0.6'
+    compile "com.timeout:docless_${scala_major}:0.5.0"
+
+
 
     // Tests
     testCompile "org.scalatest:scalatest_$scala_major:3.0.4"

@@ -4,6 +4,7 @@ import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.dsl.extractors.Extractor
 import com.github.aesteve.fertx.dsl.path.PathDefinition
 import com.github.aesteve.fertx.response._
+import shapeless.ops.zipper.Get
 
 object TestPathDefinition extends App with SendsDefaultText {
 

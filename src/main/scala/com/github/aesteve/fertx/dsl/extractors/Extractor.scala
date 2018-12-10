@@ -3,6 +3,7 @@ package com.github.aesteve.fertx.dsl.extractors
 import com.github.aesteve.fertx.response.ClientError
 import com.github.aesteve.fertx.util.Tuple
 import com.github.aesteve.fertx.util.TupleOps.Join
+import com.timeout.docless.swagger.Operation
 import io.vertx.scala.ext.web.RoutingContext
 
 abstract class Extractor[T] {
@@ -25,8 +26,13 @@ abstract class Extractor[T] {
             }
           }
         }
+
+      override def buildOpenAPI(operation: Operation): Operation =
+        other.buildOpenAPI(Extractor.this.buildOpenAPI(operation))
     }
   }
+
+  def buildOpenAPI(operation: Operation): Operation
 
 
 

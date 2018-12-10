@@ -1,11 +1,12 @@
 package com.github.aesteve.fertx
 
-import com.github.aesteve.fertx.dsl.extractors.QueryParamExtractor
+import com.github.aesteve.fertx.dsl.extractors.{QueryParamExtractor, _}
 import com.github.aesteve.fertx.dsl.path.{PathFragmentDefinition, _}
 import com.github.aesteve.fertx.dsl.routing.RouteDefinition
 import com.github.aesteve.fertx.dsl.routing.impl.RouteDefinitionImpl
 import com.github.aesteve.fertx.request.RequestType
 import com.github.aesteve.fertx.response.{BadRequest, ClientError, NoContentErrorMarshaller, ResponseType}
+import com.timeout.docless.swagger.{Operation, Parameter}
 import io.vertx.core.http.HttpMethod
 
 import scala.util.Try
@@ -30,6 +31,9 @@ package object dsl {
     override def toRegex: String = ".*"
 
     override def fromParam: Option[String] => Either[ClientError, Unit] = _ => Right(())
+
+    override def buildOpenAPI(operation: Operation): Operation =
+      operation
   }
 
   case class FixedPath(str: String) extends PathFragDef0 {
@@ -42,6 +46,9 @@ package object dsl {
     override def fromParam: Option[String] => Either[ClientError, Unit] =
       _ => Right(())
 
+    override def buildOpenAPI(operation: Operation): Operation =
+      operation
+
   }
 
   object IntPath extends PathFragDef1[Int] {
@@ -53,6 +60,13 @@ package object dsl {
 
     override def fromParam: Option[String] => Either[ClientError, Tuple1[Int]] =
       strToInt
+
+    override def buildOpenAPI(operation: Operation): Operation = {
+      val param = Parameter
+        .path("path")
+          .as[Int]
+      operation.withParams(param)
+    }
 
   }
 
@@ -69,10 +83,15 @@ package object dsl {
     }
 
 
+    override def buildOpenAPI(operation: Operation): Operation = {
+      val param = Parameter.path("")
+      operation.withParams(param)
+    }
+
   }
 
 
-  class Param[T](name: String, fun: Option[String] => Either[ClientError, T]) extends QueryParam1[T](name) {
+  class Param[T](name: String, fun: Option[String] => Either[ClientError, T], handleParam: Parameter => Parameter) extends QueryParam1[T](name, handleParam) {
     override def fromReq: Option[String] => Either[ClientError, Tuple1[T]] =
       s => fun(s) match {
         case Right(value) =>
@@ -87,19 +106,32 @@ package object dsl {
       Left(BadRequest(s"Query parameter $name expected"))
     case Some(value) =>
       Right(value)
+  }, param => {
+    param.as[String]
+    param
   })
 
   case class StrParamOpt(name: String) extends Param[Option[String]](name,  {
       case None => Right(None)
       case Some(value) => Right(Some(value))
+  }, param => {
+    param.as[String]
+    param
   })
 
-  case class IntParam(name: String) extends QueryParam1[Int](name) {
+  case class IntParam(name: String) extends QueryParam1[Int](name, param => {
+    param.as[String]
+    param
+  }) {
     override def fromReq: Option[String] => Either[ClientError, Tuple1[Int]] =
       strToInt
   }
 
-  case class IntParamOpt(name: String) extends QueryParam1[Option[Int]](name) {
+  case class IntParamOpt(name: String) extends QueryParam1[Option[Int]](name, param => {
+    param.as[String]
+    param
+
+  }) {
     override def fromReq: Option[String] => Either[ClientError, Tuple1[Option[Int]]] = {
       case None =>
         Right(Tuple1(None))

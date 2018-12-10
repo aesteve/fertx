@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.github.aesteve.fertx.dsl._
 import com.github.aesteve.fertx.request.{RequestType, RequestUnmarshaller, TextPlain}
 import com.github.aesteve.fertx.response._
+import com.timeout.docless.schema.{JsonSchema, Primitives}
 import io.vertx.core.buffer.Buffer
 import io.vertx.scala.ext.web.RoutingContext
 
@@ -13,7 +14,7 @@ import io.vertx.scala.ext.web.RoutingContext
 case class FootballField(name: String)
 
 
-class BodySpec extends FertxTestBase with SendsDefaultText {
+class BodySpec extends FertxTestBase with SendsDefaultText with Primitives {
 
   "Request body" should "be read simply" in {
     implicit val textUnmarshaller = new RequestUnmarshaller[TextPlain, String] {
@@ -45,23 +46,25 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
     val myOwnMapper = new ObjectMapper with ScalaObjectMapper
     myOwnMapper.registerModule(DefaultScalaModule)
     val anfield = FootballField("Anfield Road")
-    implicit def jackson[T: Manifest]: RequestUnmarshaller[request.Json, T] = { rc =>
+    implicit val footballSchema = JsonSchema.deriveFor[FootballField]
+    implicit def jackson[T: Manifest]: RequestUnmarshaller[request.Json, T] = (rc: RoutingContext) =>
       try {
         Right(myOwnMapper.readValue[T](rc.getBodyAsString.get))
       } catch {
-        case _:Exception => Left(new MalformedBody)
+        case _: Exception => Left(new MalformedBody)
       }
-    }
+    val route =
+      POST("api" / "fields")
+        .accepts(RequestType.JSON)
+        .produces(ResponseType.PLAIN_TEXT)
+        .body[FootballField]
+        .map(field =>
+          OK(field.name)
+        )
 
-    POST("api" / "fields")
-      .accepts(RequestType.JSON)
-      .produces(ResponseType.PLAIN_TEXT)
-      .body[FootballField]
-      .map(field =>
-        OK(field.name)
-      )
+    route.attachTo(router)
 
-      .attachTo(router)
+    println(route.openAPIOperation)
 
     startTest { () =>
       client.post("/api/fields")
@@ -77,14 +80,12 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
   "Invalid request body" should "result in bad request" in {
     val myOwnMapper = new ObjectMapper with ScalaObjectMapper
     myOwnMapper.registerModule(DefaultScalaModule)
-    implicit def jackson[T: Manifest]: RequestUnmarshaller[request.Json, T] = { rc =>
-      try {
-        Right(myOwnMapper.readValue[T](rc.getBodyAsString.get))
-      } catch {
-        case _:Exception => Left(new MalformedBody)
-      }
+    implicit val footballSchema = JsonSchema.deriveFor[FootballField]
+    implicit def jackson[T: Manifest]: RequestUnmarshaller[request.Json, T] = (rc: RoutingContext) => try {
+      Right(myOwnMapper.readValue[T](rc.getBodyAsString.get))
+    } catch {
+      case _: Exception => Left(new MalformedBody)
     }
-
     POST("api" / "fields" / "invalid")
       .accepts(RequestType.JSON)
       .produces(ResponseType.PLAIN_TEXT)

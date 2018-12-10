@@ -2,9 +2,10 @@ package com.github.aesteve.fertx.dsl.routing
 
 import com.github.aesteve.fertx.dsl.extractors.{Extractor, QueryParamExtractor}
 import com.github.aesteve.fertx.dsl.{Param, StrParam, StrParamOpt}
-import com.github.aesteve.fertx.request.{RequestType, RequestUnmarshaller}
+import com.github.aesteve.fertx.request.{RequestType, RequestUnmarshaller, WithSchemaRequestUnmarshaller}
 import com.github.aesteve.fertx.response.{BadRequest, ClientError, ErrorMarshaller, ResponseType}
 import com.github.aesteve.fertx.util.TupleOps.Join
+import com.timeout.docless.schema.JsonSchema
 
 import scala.util.Try
 
@@ -24,7 +25,12 @@ trait RouteDefinition[In, RequestMime <: RequestType, ResponseMime <: ResponseTy
     lift(queryParamExtractor)(join)
 
   def query[P](name: String, fun: Option[String] => Either[ClientError, P])(implicit join: Join[In, Tuple1[P]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    query(new Param[P](name, fun))(join)
+    query(new Param[P](name, fun, param => {
+      // FIXME
+      //  param.required(false)
+      param.as[String]
+      param
+    }))(join)
 
   def query(name: String)(implicit join: Join[In, Tuple1[String]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
     query(StrParam(name))(join)
@@ -39,8 +45,8 @@ trait RouteDefinition[In, RequestMime <: RequestType, ResponseMime <: ResponseTy
   }
 
   /* Request Body */
-  def body[C](implicit unmarshaller: RequestUnmarshaller[RequestMime, C], join: Join[In, Tuple1[C]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    lift(unmarshaller)(join)
+  def body[C](implicit schema: JsonSchema[C], unmarshaller: RequestUnmarshaller[RequestMime, C], join: Join[In, Tuple1[C]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
+    lift(new WithSchemaRequestUnmarshaller(unmarshaller, schema))(join)
 
   /* TODO: deal with headers */
 

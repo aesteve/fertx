@@ -6,6 +6,7 @@ import com.github.aesteve.fertx.dsl.routing.{FinalizedRoute, RouteDefinition}
 import com.github.aesteve.fertx.request.RequestType
 import com.github.aesteve.fertx.response._
 import com.github.aesteve.fertx.util.TupleOps.Join
+import com.timeout.docless.swagger.Operation
 import io.vertx.core.http.{HttpHeaders, HttpMethod}
 import io.vertx.scala.ext.web.{Route, RoutingContext}
 
@@ -60,4 +61,6 @@ class RouteDefinitionImpl[Path, In, RequestMime <: RequestType, ResponseMime <: 
 
   override def flatMapTuple(f: In => Future[Response[ResponseMime]]): FinalizedRoute =
     new AsyncFinalizedRouteImpl(this, attachProduces, f, errorMarshaller)
+
+  override def buildOpenAPI(operation: Operation): Operation = extractor.buildOpenAPI(operation)
 }
