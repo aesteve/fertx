@@ -11,7 +11,7 @@ object TestPathDefinition extends App with SendsDefaultText {
   // TODO: Add real-life test matching these
 
   // () => Response
-  val OKUnit: () => Response[response.NoContent] = () => OK
+  val OKUnit: () => Response[Unit] = () => OK
   val simpleStrPath: PathDefinition[Unit] = "api"
   GET(simpleStrPath) { () =>
     OK
@@ -93,7 +93,7 @@ object TestPathDefinition extends App with SendsDefaultText {
     assert(int2.isInstanceOf[Int])
     OK
   }
-  val f: (Int, Int) => Response[response.NoContent] = (int1, int2) => OK
+  val f: (Int, Int) => Response[Unit] = (int1, int2) => OK
   GET(path).map(f)
 
   val pathWithOptQuery = "api" / "path" / "opt" / "query"
@@ -114,18 +114,26 @@ object TestPathDefinition extends App with SendsDefaultText {
       case (None, None)         => NotFound
     }
 
+
+  /*
+
+  val intSchema = new Schema[Int]()
+  intSchema.`type`("integer")
   GET("api" / "query" / "custom" / "withdefault")
-    .tryQuery("test", _.map(_.toInt).getOrElse(0))
+    .tryQuery("test", _.map(_.toInt).getOrElse(0), intSchema)
     .map { i: Int => OK }
 
   val IntToTextMarshaller: ResponseMarshaller[TextPlain, Int] =
     (int, resp) => resp.end(int.toString)
 
   GET("api" / "query" / "custom" / "withoutdefault")
-    .tryQuery("test", _.map(_.toInt))
+    .tryQuery[Option[Int]]("test", _.map(_.toInt), intSchema)
     .produces(ResponseType.PLAIN_TEXT)
     .map {
       case Some(int) => OK(int)(IntToTextMarshaller)
       case None => NotFound
     }
+
+  */
+
 }

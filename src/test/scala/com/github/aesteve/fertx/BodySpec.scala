@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.github.aesteve.fertx.dsl._
-import com.github.aesteve.fertx.request.{RequestType, RequestUnmarshaller, TextPlain}
+import com.github.aesteve.fertx.media._
+import com.github.aesteve.fertx.request.RequestUnmarshaller
 import com.github.aesteve.fertx.response._
+import io.swagger.v3.oas.models.media.{Schema, StringSchema}
 import io.vertx.core.buffer.Buffer
 import io.vertx.scala.ext.web.RoutingContext
-
 
 case class FootballField(name: String)
 
@@ -16,16 +17,20 @@ case class FootballField(name: String)
 class BodySpec extends FertxTestBase with SendsDefaultText {
 
   "Request body" should "be read simply" in {
-    implicit val textUnmarshaller = new RequestUnmarshaller[TextPlain, String] {
+    implicit val textUnmarshaller = new RequestUnmarshaller[`text/plain`, String] {
       override def extract(rc: RoutingContext): Either[MalformedBody, String] =
         Right(rc.getBodyAsString.get)
+
+      override def schema: Schema[String] =
+        new StringSchema
+
     }
     val sent = "Some_payload"
 
     POST("api" / "echo")
-      .accepts(RequestType.PLAIN_TEXT)
+      .accepts[`text/plain`]
       .body[String]
-      .produces(ResponseType.PLAIN_TEXT)
+      .produces[`text/plain`]
       .map(OK(_))
 
       .attachTo(router)
@@ -45,17 +50,21 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
     val myOwnMapper = new ObjectMapper with ScalaObjectMapper
     myOwnMapper.registerModule(DefaultScalaModule)
     val anfield = FootballField("Anfield Road")
-    implicit def jackson[T: Manifest]: RequestUnmarshaller[request.Json, T] = { rc =>
-      try {
-        Right(myOwnMapper.readValue[T](rc.getBodyAsString.get))
-      } catch {
-        case _:Exception => Left(new MalformedBody)
-      }
+    implicit def jackson[T: Manifest] = new RequestUnmarshaller[`application/json`, T] {
+      override def extract(rc: RoutingContext): Either[MalformedBody, T] =
+        try {
+          Right(myOwnMapper.readValue[T](rc.getBodyAsString.get))
+        } catch {
+          case _:Exception => Left(new MalformedBody)
+        }
+
+      override def schema: Schema[T] =
+        ???
     }
 
     POST("api" / "fields")
-      .accepts(RequestType.JSON)
-      .produces(ResponseType.PLAIN_TEXT)
+      .accepts[`application/json`]
+      .produces[`text/plain`]
       .body[FootballField]
       .map(field =>
         OK(field.name)
@@ -77,17 +86,20 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
   "Invalid request body" should "result in bad request" in {
     val myOwnMapper = new ObjectMapper with ScalaObjectMapper
     myOwnMapper.registerModule(DefaultScalaModule)
-    implicit def jackson[T: Manifest]: RequestUnmarshaller[request.Json, T] = { rc =>
-      try {
-        Right(myOwnMapper.readValue[T](rc.getBodyAsString.get))
-      } catch {
-        case _:Exception => Left(new MalformedBody)
-      }
+    implicit def jackson[T: Manifest] = new RequestUnmarshaller[`application/json`, T] {
+      override def extract(rc: RoutingContext): Either[MalformedBody, T] =
+        try {
+          Right(myOwnMapper.readValue[T](rc.getBodyAsString.get))
+        } catch {
+          case _:Exception => Left(new MalformedBody)
+        }
+
+      override def schema: Schema[T] = ???
     }
 
     POST("api" / "fields" / "invalid")
-      .accepts(RequestType.JSON)
-      .produces(ResponseType.PLAIN_TEXT)
+      .accepts[`application/json`]
+      .produces[`text/plain`]
       .body[FootballField]
       .map(field =>
         OK(field.name)
@@ -112,14 +124,16 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
     val queryParam = "qparam"
     val queryValue = "qvalue"
 
-    implicit val textUnmarshaller = new RequestUnmarshaller[TextPlain, String] {
+    implicit val textUnmarshaller = new RequestUnmarshaller[`text/plain`, String] {
       override def extract(rc: RoutingContext): Either[MalformedBody, String] =
         Right(rc.getBodyAsString.get)
+
+      override def schema: Schema[String] = new StringSchema
     }
 
     POST("api" / "bodyandparams" / IntPath)
-      .accepts(RequestType.PLAIN_TEXT)
-      .produces(ResponseType.PLAIN_TEXT)
+      .accepts[`text/plain`]
+      .produces[`text/plain`]
       .query(queryParam)
       .body[String]
       .map { (id, query, body) =>

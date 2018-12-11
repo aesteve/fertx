@@ -1,16 +1,16 @@
 package com.github.aesteve.fertx.dsl.routing.impl
 
 import com.github.aesteve.fertx.dsl.routing.FinalizedRoute
-import com.github.aesteve.fertx.request.RequestType
-import com.github.aesteve.fertx.response.{ErrorMarshaller, ResponseType}
+import com.github.aesteve.fertx.media.MimeType
+import com.github.aesteve.fertx.response.ErrorMarshaller
 import io.vertx.scala.ext.web.handler.BodyHandler
 import io.vertx.scala.ext.web.{Route, Router, RoutingContext}
 
-abstract class AbstractFinalizedRoute[Path, In, RequestMime <: RequestType, ResponseMime <: ResponseType](
+abstract class AbstractFinalizedRoute[Path, In, RequestMime, ResponseMime](
   routeDefinition: RouteDefinitionImpl[Path, In, RequestMime, ResponseMime],
   vertxHandlers: List[Route => Unit],
   errorMarshaller: ErrorMarshaller[ResponseMime]
-) extends FinalizedRoute {
+)(implicit requestMime: MimeType[RequestMime], responseMime: MimeType[ResponseMime]) extends FinalizedRoute {
 
 
   override def attachTo(router: Router): Unit = {

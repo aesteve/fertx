@@ -1,7 +1,8 @@
 package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl._
-import com.github.aesteve.fertx.response.{OK, ResponseType}
+import com.github.aesteve.fertx.media._
+import com.github.aesteve.fertx.response.OK
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -27,7 +28,7 @@ class PathTest extends FertxTestBase with SendsDefaultText {
     val requestPath = "/api/v1/toons/3"
     requestPath should fullyMatch regex serverPath.toFullPath
     GET(serverPath)
-      .produces(ResponseType.PLAIN_TEXT)
+      .produces[`text/plain`]
       .map { (apiVersion, toonId) =>
         OK(s"$apiVersion$toonId")
       }.attachTo(router)
