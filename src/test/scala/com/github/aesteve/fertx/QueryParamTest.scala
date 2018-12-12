@@ -1,6 +1,7 @@
 package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl._
+import com.github.aesteve.fertx.media._
 import com.github.aesteve.fertx.response._
 
 class QueryParamTest extends FertxTestBase with SendsDefaultText {
@@ -8,7 +9,7 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
   "Mandatory query param" should "not be missing" in {
     GET("api" / "mandatoryparam")
       .query("mandatoryparam")
-      .produces(ResponseType.PLAIN_TEXT)
+      .produces[`text/plain`]
       .map { param =>
         OK(param)
       }
@@ -28,7 +29,7 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
     GET("api" / "mandatoryparams")
       .query(param1)
       .query(param2)
-      .produces(ResponseType.PLAIN_TEXT)
+      .produces[`text/plain`]
       .map { (first, second) =>
         OK(s"$first:$second")
       }
@@ -65,7 +66,7 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
     val path = "/api/nonmandatory"
     GET("api" / "nonmandatory")
       .optQuery(paramName)
-      .produces(ResponseType.PLAIN_TEXT)
+      .produces[`text/plain`]
       .map {
         case Some(thing) => OK(thing)
         case None => NotFound

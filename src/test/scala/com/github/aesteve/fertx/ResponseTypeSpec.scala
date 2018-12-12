@@ -3,6 +3,7 @@ package com.github.aesteve.fertx
 import java.nio.file.Paths
 
 import com.github.aesteve.fertx.dsl._
+import com.github.aesteve.fertx.media._
 import com.github.aesteve.fertx.response._
 import io.vertx.core.http.HttpHeaders
 import io.vertx.lang.scala.json.JsonObject
@@ -15,11 +16,12 @@ class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
   private val Goat = Player("Michael", "Jordan")
 
   "A text response " should "be created according to implicit marshallers" in {
-    implicit val PlayerTextMarshaller: ResponseMarshaller[TextPlain, Player] =
+    implicit val PlayerTextMarshaller: ResponseMarshaller[`text/plain`, Player] =
       (p: Player, resp: HttpServerResponse) =>
         resp.end(s"${p.firstname}:${p.lastname}")
     GET("some" / "text")
-      .produces(ResponseType.PLAIN_TEXT).map { () =>
+      .produces[`text/plain`]
+      .map { () =>
         OK(Goat)
       }.attachTo(router)
     startTest { () =>
@@ -32,11 +34,11 @@ class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
 
   "A Json response" should "work the same way" in {
     val createJson = (p: Player) => new JsonObject().put("firstname", p.firstname).put("lastname", p.lastname)
-    implicit val PlayerJsonMarshaller: ResponseMarshaller[Json, Player] =
+    implicit val PlayerJsonMarshaller: ResponseMarshaller[`application/json`, Player] =
       (p: Player, resp: HttpServerResponse) =>
         resp.end(createJson(p).encode())
 
-    implicit val ErrorJsonMarshaller: ErrorMarshaller[Json] = new ErrorMarshaller[Json] {
+    implicit val ErrorJsonMarshaller: ErrorMarshaller[`application/json`] = new ErrorMarshaller[`application/json`] {
       override def handle(resp: HttpServerResponse, clientError: ClientError): Unit =
         resp.setStatusCode(clientError.status)
         .end(new JsonObject().put("message", clientError.message.getOrElse("")).encode())
@@ -48,13 +50,13 @@ class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
 
 
     GET("some" / "text")
-      .produces(ResponseType.JSON)
+      .produces[`application/json`]
       .map { () => OK(Goat) }
       .attachTo(router)
     startTest { () =>
       client.get("/some/text").sendFuture().map { resp =>
         resp.statusCode should be(200)
-        resp.getHeader(HttpHeaders.CONTENT_TYPE.toString) should equal(ResponseType.JSON.representation)
+        resp.getHeader(HttpHeaders.CONTENT_TYPE.toString) should equal(`application/json`.representation)
         resp.bodyAsJsonObject should equal(Some(createJson(Goat)))
       }
     }
@@ -66,7 +68,7 @@ class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
       file.setReadBufferSize(100)
       import com.github.aesteve.fertx.dsl.marshallers.chunkMarshaller
       GET("chunked")
-        .produces(ResponseType.CHUNKED)
+        .produces[Chunked]
         .map { () => OK(file) }
         .attachTo(router)
       startTest { () =>

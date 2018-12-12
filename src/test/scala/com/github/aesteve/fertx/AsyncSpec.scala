@@ -1,7 +1,8 @@
 package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl._
-import com.github.aesteve.fertx.response.{OK, ResponseType}
+import com.github.aesteve.fertx.media._
+import com.github.aesteve.fertx.response.OK
 import io.vertx.lang.scala.VertxExecutionContext
 
 import scala.concurrent.Future
@@ -11,11 +12,13 @@ class AsyncSpec extends FertxTestBase with SendsDefaultText {
 
   "An async response" should "be received" in {
     val sent = "value"
-    val ec = VertxExecutionContext(vertx.getOrCreateContext())
+    implicit val ec = VertxExecutionContext(vertx.getOrCreateContext())
     GET("api" / "async")
-      .produces(ResponseType.PLAIN_TEXT)
+      .produces[`text/plain`]
       .flatMap { () =>
-        Future(OK(sent))(ec)
+        Future(
+          OK(sent)
+        )
       }
       .attachTo(router)
 

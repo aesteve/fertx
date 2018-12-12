@@ -1,14 +1,14 @@
 package com.github.aesteve.fertx.dsl.marshallers
 
-import com.github.aesteve.fertx.response
+import com.github.aesteve.fertx.media._
 import com.github.aesteve.fertx.response.{ClientError, ErrorMarshaller, ResponseMarshaller}
 import io.vertx.core.buffer.Buffer
 import io.vertx.scala.core.http.HttpServerResponse
 import io.vertx.scala.core.streams.{Pump, ReadStream}
 
 class ChunkedMarshaller[T <: ReadStream[Buffer]]
-  extends ResponseMarshaller[response.Chunked, T]
-  with ErrorMarshaller[response.Chunked] {
+  extends ResponseMarshaller[Chunked, T]
+  with ErrorMarshaller[Chunked] {
 
   override def handle(stream: T, resp: HttpServerResponse): Unit = {
     resp.setChunked(true)

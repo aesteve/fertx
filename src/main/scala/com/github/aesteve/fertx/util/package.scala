@@ -1,15 +1,16 @@
 package com.github.aesteve.fertx
 
+import com.github.aesteve.fertx.media._
 import com.github.aesteve.fertx.response.ResponseMarshaller
 
 package object util {
 
   object PlainTextMarshallers {
 
-    implicit def intToStr: ResponseMarshaller[response.TextPlain, Int] =
+    implicit def intToStr: ResponseMarshaller[`text/plain`, Int] =
       (i, resp) => resp.end(i.toString)
 
-    implicit def strToStr: ResponseMarshaller[response.TextPlain, String] =
+    implicit def strToStr: ResponseMarshaller[`text/plain`, String] =
       (str, resp) => resp.end(str)
 
   }
