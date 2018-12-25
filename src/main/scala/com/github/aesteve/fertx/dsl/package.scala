@@ -25,7 +25,7 @@ package object dsl {
   def POST[T](pathDef: PathDefinition[T]): RouteDefinition[T, Unit, Unit] =
     request(HttpMethod.POST, pathDef)
 
-  object * extends UnitPathFragment("*")
+  object * extends UnitPathFragment("*") with FinalPathFragmentDefinition[Unit]
   case class FixedPath(str: String) extends UnitPathFragment(str)
 
   case class IntPath(name: String) extends CapturesPathFragment[Tuple1[Int]](new PathParameter().name(name).schema(new IntegerSchema)) {
@@ -87,8 +87,8 @@ package object dsl {
   implicit def pathFragDefFromStr(str: String): FixedPath =
     FixedPath(str)
 
-  implicit def pathDefFromStr(str: String): PathDefinition[Unit] =
-    PathDefinition(str, FixedPath(str))
+  implicit def pathDefFromStr(str: String): NonFinalPathDefinition[Unit] =
+    new NonFinalPathDefinition(str, FixedPath(str))
 
   private def strToInt: Option[String] => Either[ClientError, Tuple1[Int]] = {
     case None =>

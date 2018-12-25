@@ -11,6 +11,8 @@ trait PathFragmentDefinition[T] extends Extractor[T] {
   def getFromContext: RoutingContext => Either[ClientError, T]
 }
 
+trait FinalPathFragmentDefinition[T] extends PathFragmentDefinition[T]
+
 abstract class UnitPathFragment(path: String) extends PathFragmentDefinition[Unit] {
   override def getPath: String = path
   override def getFromContext: RoutingContext => Either[ClientError, Unit] = _ =>
