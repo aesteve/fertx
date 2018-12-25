@@ -15,13 +15,13 @@ class NonFinalPathDefinition[T](override val fullPath: String, override val extr
                                (implicit ev: Tuple[T]) extends PathDefinition[T](fullPath, extractor) {
 
   def /[R](other: PathFragmentDefinition[R])(implicit join: Join[T, R]): NonFinalPathDefinition[join.Out] = {
-    implicit val joinProducesTuple = Tuple.yes[join.Out]
+    implicit val joinProducesTuple: Tuple[join.Out] = Tuple.yes[join.Out]
     new NonFinalPathDefinition(fullPath + "/" + other.getPath, (extractor & other)(join))
   }
 
   def /[R](other: FinalPathFragmentDefinition[R])(implicit join: Join[T, R]): PathDefinition[join.Out] = {
-    implicit val joinProducesTuple = Tuple.yes[join.Out]
-    new PathDefinition(fullPath + "/" + other.getPath, (extractor & other)(join))
+    implicit val joinProducesTuple: Tuple[join.Out] = Tuple.yes[join.Out]
+    PathDefinition(fullPath + "/" + other.getPath, (extractor & other)(join))
   }
 
 }
