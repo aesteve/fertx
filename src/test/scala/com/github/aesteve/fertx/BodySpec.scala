@@ -13,7 +13,6 @@ import io.vertx.scala.ext.web.RoutingContext
 
 case class FootballField(name: String)
 
-
 class BodySpec extends FertxTestBase with SendsDefaultText {
 
   "Request body" should "be read simply" in {
@@ -27,16 +26,15 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
     }
     val sent = "Some_payload"
 
-    POST("api" / "echo")
-      .accepts[`text/plain`]
-      .body[String]
-      .produces[`text/plain`]
-      .map(OK(_))
-
-      .attachTo(router)
+    route =
+      POST("api" / "echo")
+        .accepts[`text/plain`]
+        .body[String]
+        .produces[`text/plain`]
+        .map(OK(_))
 
     startTest { () =>
-      client.post("/api/echo")
+      post("/api/echo")
         .putHeader("Content-Type", "text/plain")
         .sendBufferFuture(Buffer.buffer(sent))
         .map { response =>
@@ -55,25 +53,26 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
         try {
           Right(myOwnMapper.readValue[T](rc.getBodyAsString.get))
         } catch {
-          case _:Exception => Left(new MalformedBody)
+          case e:Exception =>
+            e.printStackTrace()
+            Left(new MalformedBody)
         }
 
       override def schema: Schema[T] =
         ???
     }
 
-    POST("api" / "fields")
-      .accepts[`application/json`]
-      .produces[`text/plain`]
-      .body[FootballField]
-      .map(field =>
-        OK(field.name)
-      )
-
-      .attachTo(router)
+    route =
+      POST("api" / "fields")
+        .accepts[`application/json`]
+        .produces[`text/plain`]
+        .body[FootballField]
+        .map(field =>
+          OK(field.name)
+        )
 
     startTest { () =>
-      client.post("/api/fields")
+      post("/api/fields")
         .putHeader("Content-Type", "application/json")
         .sendBufferFuture(Buffer.buffer(myOwnMapper.writeValueAsString(anfield)))
         .map { response =>
@@ -97,18 +96,17 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
       override def schema: Schema[T] = ???
     }
 
-    POST("api" / "fields" / "invalid")
-      .accepts[`application/json`]
-      .produces[`text/plain`]
-      .body[FootballField]
-      .map(field =>
-        OK(field.name)
-      )
-
-      .attachTo(router)
+    route =
+      POST("api" / "fields" / "invalid")
+        .accepts[`application/json`]
+        .produces[`text/plain`]
+        .body[FootballField]
+        .map(field =>
+          OK(field.name)
+        )
 
     startTest { () =>
-      client.post("/api/fields/invalid")
+      post("/api/fields/invalid")
         .putHeader("Content-Type", "application/json")
         .sendBufferFuture(Buffer.buffer(""))
         .map { response =>
@@ -131,21 +129,21 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
       override def schema: Schema[String] = new StringSchema
     }
 
-    POST("api" / "bodyandparams" / IntPath)
-      .accepts[`text/plain`]
-      .produces[`text/plain`]
-      .query(queryParam)
-      .body[String]
-      .map { (id, query, body) =>
-        assert(id.isInstanceOf[Int])
-        assert(query.isInstanceOf[String])
-        assert(body.isInstanceOf[String])
-        OK(s"$id:$query:$body")
-      }
-      .attachTo(router)
+    route =
+      POST("api" / "bodyandparams" / IntPath)
+        .accepts[`text/plain`]
+        .produces[`text/plain`]
+        .query(queryParam)
+        .body[String]
+        .map { (id, query, body) =>
+          assert(id.isInstanceOf[Int])
+          assert(query.isInstanceOf[String])
+          assert(body.isInstanceOf[String])
+          OK(s"$id:$query:$body")
+        }
 
     startTest { () =>
-      client.post(s"/api/bodyandparams/$path")
+      post(s"/api/bodyandparams/$path")
         .addQueryParam(queryParam, queryValue)
         .putHeader("Content-Type", "text/plain")
         .sendBufferFuture(Buffer.buffer(sent))

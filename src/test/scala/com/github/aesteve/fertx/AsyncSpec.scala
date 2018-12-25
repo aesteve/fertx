@@ -13,17 +13,17 @@ class AsyncSpec extends FertxTestBase with SendsDefaultText {
   "An async response" should "be received" in {
     val sent = "value"
     implicit val ec = VertxExecutionContext(vertx.getOrCreateContext())
-    GET("api" / "async")
-      .produces[`text/plain`]
-      .flatMap { () =>
-        Future(
-          OK(sent)
-        )
-      }
-      .attachTo(router)
+    route =
+      GET("api" / "async")
+        .produces[`text/plain`]
+        .flatMap { () =>
+          Future(
+            OK(sent)
+          )
+        }
 
     startTest { () =>
-      client.get("/api/async").sendFuture().map { resp =>
+      get("/api/async").sendFuture().map { resp =>
         resp.statusCode should be(200)
         resp.bodyAsString.get should equal(sent)
       }

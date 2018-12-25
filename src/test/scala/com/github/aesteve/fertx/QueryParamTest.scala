@@ -7,15 +7,16 @@ import com.github.aesteve.fertx.response._
 class QueryParamTest extends FertxTestBase with SendsDefaultText {
 
   "Mandatory query param" should "not be missing" in {
-    GET("api" / "mandatoryparam")
-      .query("mandatoryparam")
-      .produces[`text/plain`]
-      .map { param =>
-        OK(param)
-      }
-      .attachTo(router)
+    route =
+      GET("api" / "mandatoryparam")
+        .query("mandatoryparam")
+        .produces[`text/plain`]
+        .map { param =>
+          OK(param)
+        }
+
     startTest { () =>
-      client.get("/api/mandatoryparam").sendFuture().map {
+      get("/api/mandatoryparam").sendFuture().map {
         _.statusCode should be (400)
       }
     }
@@ -26,34 +27,46 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
     val param2 = "mandatory2"
     val param1Val = "1st"
     val param2Val = "2nd"
-    GET("api" / "mandatoryparams")
-      .query(param1)
-      .query(param2)
-      .produces[`text/plain`]
-      .map { (first, second) =>
-        OK(s"$first:$second")
-      }
-      .attachTo(router)
+
+    route =
+      GET("api" / "mandatoryparams")
+        .query(param1)
+        .query(param2)
+        .produces[`text/plain`]
+        .map { (first, second) =>
+          OK(s"$first:$second")
+        }
+
     val path = "/api/mandatoryparams"
     startTest { () =>
-      client.get(path).sendFuture().flatMap { respNoParam =>
-        respNoParam.statusCode should be (400)
-        client.get(path)
-          .addQueryParam(param1, param1Val).sendFuture().flatMap { resp1Param =>
-            resp1Param.statusCode should be (400)
-            client.get(path)
-              .addQueryParam(param2, param2Val)
-              .sendFuture()
-              .flatMap { resp2param =>
-                resp2param.statusCode should be(400)
-                client.get(path)
-                  .addQueryParam(param1, param1Val)
-                  .addQueryParam(param2, param2Val)
-                  .sendFuture()
-                  .map { bothParamsResp =>
-                    bothParamsResp.statusCode should be (200)
-                    bothParamsResp.bodyAsString should be (Some(s"$param1Val:$param2Val"))
-                  }
+      getNow(path).flatMap { respNoParam =>
+
+          respNoParam.statusCode should be (400)
+
+          get(path)
+            .addQueryParam(param1, param1Val)
+            .sendFuture()
+            .flatMap { resp1Param =>
+
+              resp1Param.statusCode should be (400)
+
+              get(path)
+                .addQueryParam(param2, param2Val)
+                .sendFuture()
+                .flatMap { resp2param =>
+
+                  resp2param.statusCode should be(400)
+
+                  get(path)
+                    .addQueryParam(param1, param1Val)
+                    .addQueryParam(param2, param2Val)
+                    .sendFuture()
+                    .map { bothParamsResp =>
+
+                      bothParamsResp.statusCode should be (200)
+                      bothParamsResp.bodyAsString should be (Some(s"$param1Val:$param2Val"))
+
+                    }
               }
         }
       }
@@ -64,17 +77,21 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
     val paramName = "someparam"
     val paramValue = "someparamvalue"
     val path = "/api/nonmandatory"
-    GET("api" / "nonmandatory")
-      .optQuery(paramName)
-      .produces[`text/plain`]
-      .map {
-        case Some(thing) => OK(thing)
-        case None => NotFound
-      }.attachTo(router)
+
+    route =
+      GET("api" / "nonmandatory")
+        .optQuery(paramName)
+        .produces[`text/plain`]
+        .map {
+          case Some(thing) => OK(thing)
+          case None => NotFound
+        }
+
     startTest { () =>
-      client.get(path).sendFuture().flatMap { absentResp =>
+      getNow(path).flatMap { absentResp =>
         absentResp.statusCode should be(404)
-        client.get(path)
+
+        get(path)
           .addQueryParam(paramName, paramValue)
           .sendFuture()
           .map { presentResp =>

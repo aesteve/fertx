@@ -19,13 +19,16 @@ class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
     implicit val PlayerTextMarshaller: ResponseMarshaller[`text/plain`, Player] =
       (p: Player, resp: HttpServerResponse) =>
         resp.end(s"${p.firstname}:${p.lastname}")
-    GET("some" / "text")
-      .produces[`text/plain`]
-      .map { () =>
-        OK(Goat)
-      }.attachTo(router)
+
+    route =
+      GET("some" / "text")
+        .produces[`text/plain`]
+        .map { () =>
+          OK(Goat)
+        }
+
     startTest { () =>
-      client.get("/some/text").sendFuture().map { resp =>
+      getNow("/some/text").map { resp =>
         resp.statusCode should be(200)
         resp.bodyAsString should be(Some(s"${Goat.firstname}:${Goat.lastname}"))
       }
@@ -48,13 +51,13 @@ class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
           .end(new JsonObject().put("message", error.getMessage).encode())
     }
 
+    route =
+      GET("some" / "text")
+        .produces[`application/json`]
+        .map { () => OK(Goat) }
 
-    GET("some" / "text")
-      .produces[`application/json`]
-      .map { () => OK(Goat) }
-      .attachTo(router)
     startTest { () =>
-      client.get("/some/text").sendFuture().map { resp =>
+      getNow("/some/text").map { resp =>
         resp.statusCode should be(200)
         resp.getHeader(HttpHeaders.CONTENT_TYPE.toString) should equal(`application/json`.representation)
         resp.bodyAsJsonObject should equal(Some(createJson(Goat)))
@@ -64,15 +67,18 @@ class ResponseTypeSpec extends FertxTestBase with SendsDefaultText {
 
   "A chunked response" should "be possible" in {
     val path = Paths.get(ClassLoader.getSystemResource("1000lines.txt").toURI).toAbsolutePath
-    vertx.fileSystem().openFuture(path.toString, OpenOptions().setRead(true)).flatMap { file =>
+    val ReadOnly = OpenOptions().setRead(true)
+    vertx.fileSystem().openFuture(path.toString, ReadOnly).flatMap { file =>
       file.setReadBufferSize(100)
       import com.github.aesteve.fertx.dsl.marshallers.chunkMarshaller
-      GET("chunked")
-        .produces[Chunked]
-        .map { () => OK(file) }
-        .attachTo(router)
+
+      route =
+        GET("chunked")
+          .produces[Chunked]
+          .map { () => OK(file) }
+
       startTest { () =>
-        client.get("/chunked").sendFuture().map { resp =>
+        getNow("/chunked").map { resp =>
           resp.statusCode should be(200)
           resp.body should not be empty
           resp.body.get.length should be > 100
