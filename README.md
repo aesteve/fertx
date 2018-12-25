@@ -44,26 +44,26 @@ Let's try:
 ```scala
 case class Todo(id: Int)
 GET("api" / "todos" / IntPath)
-  .produces(ResponseType.PLAIN_TEXT)
+  .produces(`text/plain`)
   .map { todoId => 
     OK(Todo(todoId))   
   }
 ```
-The compiler will complain he cannot find neither a `ResponseMarshaller[TextPlain, Todo]` nor an `ErrorMarshaller[TextPlain]`
+The compiler will complain he cannot find neither a ``ResponseMarshaller[`text/plain`, Todo]`` nor an ``ErrorMarshaller[`text/plain`]``
 This is the way to ensure, at compile time, that you're not using "unmarshallable" objects.
 And indeed, what should a `Todo` instance look like once sent to `text/plain` ?
 
 ```scala
 case class Todo(id: Int)
 // you've defined a proper way to marshall a Todo instance to plain text
-implicit val todoTextWriter = new ResponseMarshaller[TextPlain, Todo] {
+implicit val todoTextWriter = new ResponseMarshaller[`text/plain`, Todo] {
   override def handle(todo: Todo, resp: HttpServerResponse): Unit =
     resp.end(todo.id.toString)
 } 
 // you also have to provide a way to handle errors in plain/text, you can use fertx built-in marshaller
 import com.github.aesteve.dsl.marshallers.SimpleErrorTextMarshaller 
 GET("api" / "todos" / IntPath)
-  .produces(ResponseType.PLAIN_TEXT)
+  .produces(`text/plain`)
   .map { todoId => 
     OK(Todo(todoId))   
   }
@@ -75,10 +75,10 @@ Also, you can scope the `implicit` wherever you want. Either a global import for
 
 ### Read request body:
 
-The same way, we have to define a `RequestUnmarshaller[request.TextPlain, Todo]`.
+The same way, we have to define a ``RequestUnmarshaller[`text/plain`, Todo]``.
 ```scala
 case class Todo(id: Int)
-implicit val todoStrUnmarshaller = new RequestUnmarshaller[request.TextPlain, Todo] {
+implicit val todoStrUnmarshaller = new RequestUnmarshaller[`text/plain`, Todo] {
   override def extract(rc: RoutingContext): Either[MalformedBody, Payload] =
     try {
       Right(rc.getBodyAsString.get.toInt)
@@ -87,7 +87,7 @@ implicit val todoStrUnmarshaller = new RequestUnmarshaller[request.TextPlain, To
     }
 }
 POST("api" / "todos")
-  .accepts(RequesType.PLAIN_TEXT)
+  .accepts(`text/plain`)
   .body[Todo] // no problem, since the Unmarshaller is in the scope
   .map { todo => 
     // save it or whatever
@@ -101,7 +101,7 @@ POST("api" / "todos")
 ```scala
 def longComputation(): Future[Long] = ???
 POST("api" / "compute")
- .produces(ResponseType.PLAIN_TEXT) // given we have a ResponseMarshaller[TextPlain, Long] in scope
+ .produces(`text/plain`) // given we have a ResponseMarshaller[`text/plain`, Long] in scope
  .flatMap { () =>
   longComputation().map(OK(_)) 
  }
