@@ -130,7 +130,7 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
     }
 
     route =
-      POST("api" / "bodyandparams" / IntPath("id"))
+      POST("api" / "bodyandparams" / 'id.as[Int])
         .accepts[`text/plain`]
         .produces[`text/plain`]
         .query(queryParam)

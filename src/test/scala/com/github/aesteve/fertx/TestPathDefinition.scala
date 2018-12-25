@@ -34,8 +34,8 @@ object TestPathDefinition extends App with SendsDefaultText {
 
 
   // Int => Response
-  val intParam: PathDefinition[Tuple1[Int]] = "api" / IntPath("version")
-  GET("api" / IntPath("version")) { int =>
+  val intParam: PathDefinition[Tuple1[Int]] = "api" / 'version.as[Int]
+  GET("api" / 'version.as[Int]) { int =>
     assert(int.isInstanceOf[Int])
     OK
   }
@@ -47,7 +47,7 @@ object TestPathDefinition extends App with SendsDefaultText {
 
 
   // (Int, Int) => Response
-  val oneStringTwoInts: PathDefinition[(Int, Int)] = "api" / IntPath("i1") / IntPath("i2")
+  val oneStringTwoInts: PathDefinition[(Int, Int)] = "api" / 'i1.as[Int] / 'i2.as[Int]
   GET(oneStringTwoInts) { (int1, int2) =>
     assert(int1.isInstanceOf[Int])
     assert(int2.isInstanceOf[Int])
@@ -66,7 +66,7 @@ object TestPathDefinition extends App with SendsDefaultText {
 
 
   val pathAndQuery =
-    GET("api" / IntPath("i1") / IntPath("i2") / *)
+    GET("api" / 'i1.as[Int] / 'i2.as[Int] / *)
       .query("someint") // mandatory
 
   pathAndQuery { (int1, int2, int3) =>
@@ -87,7 +87,7 @@ object TestPathDefinition extends App with SendsDefaultText {
     OK
   }
 
-  val path = "api" / IntPath("i1") / IntPath("i2")
+  val path = "api" / 'i1.as[Int] / 'i2.as[Int]
   GET(path).map { (int1, int2) =>
     assert(int1.isInstanceOf[Int])
     assert(int2.isInstanceOf[Int])

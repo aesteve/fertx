@@ -24,7 +24,7 @@ class PathTest extends FertxTestBase with SendsDefaultText {
   }
 
   "Path parameters" should "be extracted" in {
-    val serverPath = "api" / StrPath("version") / "toons" / IntPath("id")
+    val serverPath = "api" / 'version / "toons" / 'id
     val requestPath = "/api/v1/toons/3"
 
     route =
@@ -84,6 +84,36 @@ class PathTest extends FertxTestBase with SendsDefaultText {
         }
       }
     }
+  }
+
+  "Different types of path" should "be extracted" in {
+
+    val serverPath =
+      "api" /
+      'string /
+      'short.as[Short] /
+      'int.as[Int] /
+      'long.as[Long] /
+      'double.as[Double] /
+      'float.as[Float] /
+      'bool.as[Boolean]
+
+    val requestPath = "/api/str/1/2049/999999999999/2.0/7.0/true"
+
+    route =
+      GET(serverPath)
+        .produces[`text/plain`]
+        .map { (str, short, int, long, double, float, bool) =>
+          OK(s"/api/$str/$short/$int/$long/$double/$float/$bool")
+        }
+
+    startTest { () =>
+      getNow(requestPath).flatMap { response =>
+        response.statusCode should be(200)
+        response.bodyAsString should be(Some(requestPath))
+      }
+    }
+
   }
 
 }

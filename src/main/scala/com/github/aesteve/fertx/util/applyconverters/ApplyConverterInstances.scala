@@ -29,49 +29,49 @@ private[util] abstract class ApplyConverterInstances {
     }
   }
 
-  /*
-  implicit def hac4[T1, T2, T3, T4]: ResponseApplyConverter[(T1, T2, T3, T4)] { type In = (T1, T2, T3, T4) ⇒ Response } = new ResponseApplyConverter[(T1, T2, T3, T4)] {
-    type In = (T1, T2, T3, T4) ⇒ Response
-    def apply(fn: In): ((T1, T2, T3, T4)) ⇒ Response = {
+  implicit def hac4[T1, T2, T3, T4, R]: ApplyConverter[(T1, T2, T3, T4), R] { type In = (T1, T2, T3, T4) ⇒ R } = new ApplyConverter[(T1, T2, T3, T4), R] {
+    type In = (T1, T2, T3, T4) ⇒ R
+    def apply(fn: In): ((T1, T2, T3, T4)) ⇒ R = {
       case Tuple4(t1, t2, t3, t4) ⇒ fn(t1, t2, t3, t4)
     }
   }
-  implicit def hac5[T1, T2, T3, T4, T5]: ResponseApplyConverter[(T1, T2, T3, T4, T5)] { type In = (T1, T2, T3, T4, T5) ⇒ Response } = new ResponseApplyConverter[(T1, T2, T3, T4, T5)] {
-    type In = (T1, T2, T3, T4, T5) ⇒ Response
-    def apply(fn: In): ((T1, T2, T3, T4, T5)) ⇒ Response = {
+  implicit def hac5[T1, T2, T3, T4, T5, R]: ApplyConverter[(T1, T2, T3, T4, T5), R] { type In = (T1, T2, T3, T4, T5) ⇒ R } = new ApplyConverter[(T1, T2, T3, T4, T5), R] {
+    type In = (T1, T2, T3, T4, T5) ⇒ R
+    def apply(fn: In): ((T1, T2, T3, T4, T5)) ⇒ R = {
       case Tuple5(t1, t2, t3, t4, t5) ⇒ fn(t1, t2, t3, t4, t5)
     }
   }
-  implicit def hac6[T1, T2, T3, T4, T5, T6]: ResponseApplyConverter[(T1, T2, T3, T4, T5, T6)] { type In = (T1, T2, T3, T4, T5, T6) ⇒ Response } = new ResponseApplyConverter[(T1, T2, T3, T4, T5, T6)] {
-    type In = (T1, T2, T3, T4, T5, T6) ⇒ Response
-    def apply(fn: In): ((T1, T2, T3, T4, T5, T6)) ⇒ Response = {
+  implicit def hac6[T1, T2, T3, T4, T5, T6, R]: ApplyConverter[(T1, T2, T3, T4, T5, T6), R] { type In = (T1, T2, T3, T4, T5, T6) ⇒ R } = new ApplyConverter[(T1, T2, T3, T4, T5, T6), R] {
+    type In = (T1, T2, T3, T4, T5, T6) ⇒ R
+    def apply(fn: In): ((T1, T2, T3, T4, T5, T6)) ⇒ R = {
       case Tuple6(t1, t2, t3, t4, t5, t6) ⇒ fn(t1, t2, t3, t4, t5, t6)
     }
   }
-  implicit def hac7[T1, T2, T3, T4, T5, T6, T7]: ResponseApplyConverter[(T1, T2, T3, T4, T5, T6, T7)] { type In = (T1, T2, T3, T4, T5, T6, T7) ⇒ Response } = new ResponseApplyConverter[(T1, T2, T3, T4, T5, T6, T7)] {
-    type In = (T1, T2, T3, T4, T5, T6, T7) ⇒ Response
-    def apply(fn: In): ((T1, T2, T3, T4, T5, T6, T7)) ⇒ Response = {
+  implicit def hac7[T1, T2, T3, T4, T5, T6, T7, R]: ApplyConverter[(T1, T2, T3, T4, T5, T6, T7), R] { type In = (T1, T2, T3, T4, T5, T6, T7) ⇒ R } = new ApplyConverter[(T1, T2, T3, T4, T5, T6, T7), R] {
+    type In = (T1, T2, T3, T4, T5, T6, T7) ⇒ R
+    def apply(fn: In): ((T1, T2, T3, T4, T5, T6, T7)) ⇒ R = {
       case Tuple7(t1, t2, t3, t4, t5, t6, t7) ⇒ fn(t1, t2, t3, t4, t5, t6, t7)
     }
   }
-  implicit def hac8[T1, T2, T3, T4, T5, T6, T7, T8]: ResponseApplyConverter[(T1, T2, T3, T4, T5, T6, T7, T8)] { type In = (T1, T2, T3, T4, T5, T6, T7, T8) ⇒ Response } = new ResponseApplyConverter[(T1, T2, T3, T4, T5, T6, T7, T8)] {
-    type In = (T1, T2, T3, T4, T5, T6, T7, T8) ⇒ Response
-    def apply(fn: In): ((T1, T2, T3, T4, T5, T6, T7, T8)) ⇒ Response = {
+  implicit def hac8[T1, T2, T3, T4, T5, T6, T7, T8, R]: ApplyConverter[(T1, T2, T3, T4, T5, T6, T7, T8), R] { type In = (T1, T2, T3, T4, T5, T6, T7, T8) ⇒ R } = new ApplyConverter[(T1, T2, T3, T4, T5, T6, T7, T8), R] {
+    type In = (T1, T2, T3, T4, T5, T6, T7, T8) ⇒ R
+    def apply(fn: In): ((T1, T2, T3, T4, T5, T6, T7, T8)) ⇒ R = {
       case Tuple8(t1, t2, t3, t4, t5, t6, t7, t8) ⇒ fn(t1, t2, t3, t4, t5, t6, t7, t8)
     }
   }
-  implicit def hac9[T1, T2, T3, T4, T5, T6, T7, T8, T9]: ResponseApplyConverter[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] { type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9) ⇒ Response } = new ResponseApplyConverter[Tuple9[T1, T2, T3, T4, T5, T6, T7, T8, T9]] {
-    type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9) ⇒ Response
-    def apply(fn: In): ((T1, T2, T3, T4, T5, T6, T7, T8, T9)) ⇒ Response = {
+  implicit def hac9[T1, T2, T3, T4, T5, T6, T7, T8, T9, R]: ApplyConverter[(T1, T2, T3, T4, T5, T6, T7, T8, T9), R] { type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9) ⇒ R } = new ApplyConverter[(T1, T2, T3, T4, T5, T6, T7, T8, T9), R] {
+    type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9) ⇒ R
+    def apply(fn: In): ((T1, T2, T3, T4, T5, T6, T7, T8, T9)) ⇒ R = {
       case Tuple9(t1, t2, t3, t4, t5, t6, t7, t8, t9) ⇒ fn(t1, t2, t3, t4, t5, t6, t7, t8, t9)
     }
   }
-  implicit def hac10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]: ResponseApplyConverter[Tuple10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]] { type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) ⇒ Response } = new ResponseApplyConverter[Tuple10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]] {
-    type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) ⇒ Response
-    def apply(fn: In): (Tuple10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]) ⇒ Response = {
+  implicit def hac10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R]: ApplyConverter[Tuple10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10], R] { type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) ⇒ R } = new ApplyConverter[Tuple10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10], R] {
+    type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) ⇒ R
+    def apply(fn: In): ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)) ⇒ R = {
       case Tuple10(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) ⇒ fn(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10)
     }
   }
+  /*
   implicit def hac11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]: ResponseApplyConverter[Tuple11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]] { type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) ⇒ Response } = new ResponseApplyConverter[Tuple11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]] {
     type In = (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) ⇒ Response
     def apply(fn: In): (Tuple11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]) ⇒ Response = {
