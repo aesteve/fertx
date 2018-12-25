@@ -37,6 +37,6 @@ abstract class AbstractFinalizedRoute[Path, In, RequestMime, ResponseMime](
   protected def invokeMapper(payload: In, rc: RoutingContext): Unit
 
   private def createRoute(router: Router): Route =
-    router.routeWithRegex(routeDefinition.method, routeDefinition.path.toFullPath)
+    router.route(routeDefinition.method, routeDefinition.path.toFullPath)
 
 }

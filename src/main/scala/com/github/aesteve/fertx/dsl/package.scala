@@ -14,8 +14,6 @@ import scala.util.Try
 
 package object dsl {
 
-  type PathFragDef0 = PathFragmentDefinition[Unit]
-  type PathFragDef1[T] = PathFragmentDefinition[Tuple1[T]]
   type QueryParam1[T] = QueryParamExtractor[Tuple1[T]]
 
   def request[T](method: HttpMethod, pathDef: PathDefinition[T]): RouteDefinition[T, Unit, Unit] =
@@ -27,53 +25,20 @@ package object dsl {
   def POST[T](pathDef: PathDefinition[T]): RouteDefinition[T, Unit, Unit] =
     request(HttpMethod.POST, pathDef)
 
-  object * extends PathFragDef0(None) {
+  object * extends UnitPathFragment("*")
+  case class FixedPath(str: String) extends UnitPathFragment(str)
 
-    override def captures: Boolean = false
-
-    override def toRegex: String = ".*"
-
-    override def fromParam: Option[String] => Either[ClientError, Unit] = _ => Right(())
-  }
-
-  case class FixedPath(str: String) extends PathFragDef0(None) {
-
-    override def captures: Boolean = false
-
-    override def toRegex: String =
-      str
-
-    override def fromParam: Option[String] => Either[ClientError, Unit] =
-      _ => Right(())
-
-  }
-
-  private val pathParam = Some(new PathParameter())
-
-  object IntPath extends PathFragDef1[Int](pathParam.map(_.schema(new IntegerSchema))) {
-
-    override def captures: Boolean = true
-
-    override def toRegex: String =
-      "(\\d+)"
+  case class IntPath(name: String) extends CapturesPathFragment[Tuple1[Int]](new PathParameter().name(name).schema(new IntegerSchema)) {
 
     override def fromParam: Option[String] => Either[ClientError, Tuple1[Int]] =
       strToInt
 
   }
 
-  object StrPath extends PathFragDef1[String](pathParam.map(_.schema(new StringSchema))) {
+  case class StrPath(name: String) extends CapturesPathFragment[Tuple1[String]](new PathParameter().name(name).schema(new StringSchema)) {
 
-    override def captures: Boolean = true
-
-    override def toRegex: String =
-      "(\\w+)"
-
-    override def fromParam: Option[String] => Either[ClientError, Tuple1[String]] = {
-      case None => Left(BadRequest("Path parameter absent"))
-      case Some(str) => Right(Tuple1(str))
-    }
-
+    override def fromParam: Option[String] => Either[ClientError, Tuple1[String]] = opt =>
+      Right(Tuple1(opt.get))
 
   }
 
@@ -123,7 +88,7 @@ package object dsl {
     FixedPath(str)
 
   implicit def pathDefFromStr(str: String): PathDefinition[Unit] =
-    PathDefinition(str, FixedPath(str).at(0))
+    PathDefinition(str, FixedPath(str))
 
   private def strToInt: Option[String] => Either[ClientError, Tuple1[Int]] = {
     case None =>

@@ -6,24 +6,32 @@ import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.vertx.scala.ext.web.RoutingContext
 
-abstract class PathFragmentDefinition[T](parameter: Option[Parameter]) {
-
-  def captures: Boolean
-  def toRegex: String
-  def fromParam: Option[String] => Either[ClientError, T]
-  def at(pos: Int): PathFrag[T] = PathFrag(pos, this, parameter)
-
+trait PathFragmentDefinition[T] extends Extractor[T] {
+  def getPath: String
+  def getFromContext: RoutingContext => Either[ClientError, T]
 }
 
-case class PathFrag[T](pos: Int, fragDef: PathFragmentDefinition[T], parameter: Option[Parameter]) extends Extractor[T] {
+abstract class UnitPathFragment(path: String) extends PathFragmentDefinition[Unit] {
+  override def getPath: String = path
+  override def getFromContext: RoutingContext => Either[ClientError, Unit] = _ =>
+    Right((): Unit)
+
+  override def buildOpenApi(operation: Operation): Operation =
+    operation
+}
+
+abstract class CapturesPathFragment[T](parameter: Parameter) extends PathFragmentDefinition[T] {
+
+  def fromParam: Option[String] => Either[ClientError, T]
+
+  override def getPath: String =
+    s":${parameter.getName}"
 
   override def getFromContext: RoutingContext => Either[ClientError, T] =
     rc =>
-      fragDef.fromParam(rc.request().getParam("param" + pos))
+      fromParam(rc.request().getParam(parameter.getName))
 
-  override def buildOpenApi(operation: Operation): Operation = {
-    parameter.foreach(operation.addParametersItem)
-    operation
-  }
+  override def buildOpenApi(operation: Operation): Operation =
+    operation.addParametersItem(parameter)
 
 }

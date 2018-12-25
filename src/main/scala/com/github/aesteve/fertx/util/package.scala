@@ -15,6 +15,8 @@ package object util {
 
   }
 
+  /*
+
   implicit class MyStringContext(val sc: StringContext) {
 
     object hs {
@@ -31,7 +33,6 @@ package object util {
 
   }
 
-  /*
   implicit class HeaderUnapply(multiMap: MultiMap) {
 
     object Authorization {
@@ -43,6 +44,7 @@ package object util {
 
     }
   }
-  */
+
+*/
 
 }
