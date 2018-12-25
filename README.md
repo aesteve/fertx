@@ -31,9 +31,9 @@ GET("api" / "todos" / IntPath) { todoId =>
 
 ### Extract data from path and query:
 ```scala
-GET("api" / "todos" / IntPath)
+GET("api" / "todos" / 'id.as[Int])
   .query("filterById")
-  .map { (todoId, paramValue) =>
+  .map { (todoId, filterValue) =>
     // ...
   }
 }
@@ -43,7 +43,7 @@ GET("api" / "todos" / IntPath)
 Let's try:
 ```scala
 case class Todo(id: Int)
-GET("api" / "todos" / IntPath)
+GET("api" / "todos" / 'id.as[Int])
   .produces(`text/plain`)
   .map { todoId => 
     OK(Todo(todoId))   
@@ -62,7 +62,7 @@ implicit val todoTextWriter = new ResponseMarshaller[`text/plain`, Todo] {
 } 
 // you also have to provide a way to handle errors in plain/text, you can use fertx built-in marshaller
 import com.github.aesteve.dsl.marshallers.SimpleErrorTextMarshaller 
-GET("api" / "todos" / IntPath)
+GET("api" / "todos" / 'id.as[Int])
   .produces(`text/plain`)
   .map { todoId => 
     OK(Todo(todoId))   
