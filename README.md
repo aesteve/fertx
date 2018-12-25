@@ -20,7 +20,7 @@ HEAD("api" / "health") { () =>
 ### Extract data from path:
 
 ```scala 
-GET("api" / "todos" / IntPath) { todoId =>
+GET("api" / "todos" / 'id.as[Int]) { todoId =>
   if (todoId > 10) { // todoId is an Int
     NotFound
   } else {
