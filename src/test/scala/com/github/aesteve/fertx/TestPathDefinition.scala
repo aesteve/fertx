@@ -98,15 +98,15 @@ object TestPathDefinition extends App with SendsDefaultText {
 
   val pathWithOptQuery = "api" / "path" / "opt" / "query"
   GET(pathWithOptQuery)
-      .optQuery("notMandatory")
+      .query("notMandatory"?)
       .map {
         case Some(_) => OK
         case None => NotFound
       }
 
   GET("api" / "path" / "2" / "opt" / "queries")
-    .optQuery("notMandatory1")
-    .optQuery("notMandatory2")
+    .query("notMandatory1"?)
+    .query("notMandatory2"?)
     .map {
       case (Some(_), Some(_))   => OK
       case (Some(_), None)      => OK

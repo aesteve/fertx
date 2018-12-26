@@ -2,7 +2,6 @@ package com.github.aesteve.fertx.dsl.routing
 
  import com.github.aesteve.fertx.dsl.extractors.Extractor
  import com.github.aesteve.fertx.dsl.query._
- import com.github.aesteve.fertx.dsl.{StrParam, StrParamOpt}
  import com.github.aesteve.fertx.media.MimeType
  import com.github.aesteve.fertx.request.RequestUnmarshaller
  import com.github.aesteve.fertx.response.ErrorMarshaller
@@ -20,20 +19,11 @@ abstract class RouteDefinition[In, RequestMime, ResponseMime]
   def lift[C](other: Extractor[C])(implicit join: Join[In, C]): RouteDefinition[join.Out, RequestMime, ResponseMime]
 
   /* Query parameters */
-  private def _query[P](queryParamExtractor: QueryParamExtractor[P])(implicit join: Join[In, P]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    lift(queryParamExtractor)(join)
+  def query[P](queryParam: QueryParam[P])(implicit join: Join[In, Tuple1[P]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
+    lift(queryParam)(join)
 
-  private def query[P](queryParam: MandatoryQueryParamDefinition[P])(implicit join: Join[In, Tuple1[P]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    _query(queryParam)(join)
-
-  private def query[P](queryParam: OptionalQueryParamDefinition[P])(implicit join: Join[In, Tuple1[Option[P]]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    _query(queryParam)(join)
-
-  def query(name: String)(implicit join: Join[In, Tuple1[String]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    query(StrParam(name))(join)
-
-  def optQuery(name: String)(implicit join: Join[In, Tuple1[Option[String]]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    query(StrParamOpt(name))(join)
+  def query[P](queryParam: OptionQueryParam[P])(implicit join: Join[In, Tuple1[Option[P]]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
+    lift(queryParam)(join)
 
   /* Request Body */
   def body[C](implicit unmarshaller: RequestUnmarshaller[RequestMime, C], join: Join[In, Tuple1[C]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =

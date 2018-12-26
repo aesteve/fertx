@@ -11,11 +11,11 @@ package object query {
   def queryParam: Parameter =
     new Parameter().in("query")
 
-  class OptionalQueryParamDefinition[T](parameter: Parameter, mapper: String => T)
+  class OptionQueryParam[T](parameter: Parameter, mapper: String => T)
     extends QueryParamExtractor[Tuple1[Option[T]]](parameter.required(false)) {
 
-    def as[R](implicit schema: Schema[R], newMapper: T => R): OptionalQueryParamDefinition[R] =
-      new OptionalQueryParamDefinition[R](parameter.schema(schema), mapper andThen newMapper)
+    def as[R](implicit schema: Schema[R], newMapper: Tuple1[T] => R): OptionQueryParam[R] =
+      new OptionQueryParam[R](parameter.schema(schema), str => newMapper(Tuple1(mapper(str))))
 
     override def fromReq: Option[String] => Either[ClientError, Tuple1[Option[T]]] = {
       case None => Right(Tuple1(None))
@@ -25,14 +25,14 @@ package object query {
 
   }
 
-  class MandatoryQueryParamDefinition[T](parameter: Parameter, mapper: String => T)
+  class QueryParam[T](parameter: Parameter, mapper: String => T)
     extends QueryParamExtractor[Tuple1[T]](parameter.required(true)) {
 
-    def ? : OptionalQueryParamDefinition[T] =
-      new OptionalQueryParamDefinition[T](parameter, mapper)
+    def ? : OptionQueryParam[T] =
+      new OptionQueryParam[T](parameter, mapper)
 
-    def as[R](implicit schema: Schema[R], newMapper: T => R): MandatoryQueryParamDefinition[R] =
-      new MandatoryQueryParamDefinition[R](parameter.schema(schema), mapper andThen newMapper)
+    def as[R](implicit schema: Schema[R], newMapper: Tuple1[T] => R): QueryParam[R] =
+      new QueryParam[R](parameter.schema(schema), str => newMapper(Tuple1(mapper(str))))
 
     override def fromReq: Option[String] => Either[ClientError, Tuple1[T]] = {
       case None => Left(BadRequest(s"Query parameter ${parameter.getName} is missing"))

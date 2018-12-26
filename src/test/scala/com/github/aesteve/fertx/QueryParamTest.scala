@@ -1,6 +1,7 @@
 package com.github.aesteve.fertx
 
 import com.github.aesteve.fertx.dsl._
+import com.github.aesteve.fertx.dsl.query.QueryParam
 import com.github.aesteve.fertx.media._
 import com.github.aesteve.fertx.response._
 
@@ -80,7 +81,7 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
 
     route =
       GET("api" / "nonmandatory")
-        .optQuery(paramName)
+        .query(paramName.?)
         .produces[`text/plain`]
         .map {
           case Some(thing) => OK(thing)
@@ -99,6 +100,33 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
             presentResp.bodyAsString should be(Some(paramValue))
           }
       }
+    }
+  }
+
+  "Other types of params" should "be handled" in {
+    val intQueryParam: QueryParam[String] = "anInt"
+    val longQueryParam: QueryParam[String] = "aLong"
+    val intValue = "3"
+    val longValue = "9999999999999"
+
+    route =
+      GET("api" / "int" / "params")
+        .query(intQueryParam.as[Int])
+        .query(longQueryParam.as[Long])
+        .produces[`text/plain`]
+        .map { (int, long) =>
+          OK(s"$int:$long")
+        }
+
+    startTest { () =>
+      get("/api/int/params")
+        .addQueryParam("anInt", intValue)
+        .addQueryParam("aLong", longValue)
+        .sendFuture()
+        .map { resp =>
+          resp.statusCode shouldBe 200
+          resp.bodyAsString shouldEqual Some(s"$intValue:$longValue")
+        }
     }
   }
 
