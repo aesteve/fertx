@@ -67,7 +67,7 @@ object TestPathDefinition extends App with SendsDefaultText {
 
   val pathAndQuery =
     GET("api" / 'i1.as[Int] / 'i2.as[Int] / *)
-      .query("someint") // mandatory
+      .mandatoryQuery("someint") // mandatory
 
   pathAndQuery { (int1, int2, int3) =>
     assert(int1.isInstanceOf[Int])
@@ -78,8 +78,8 @@ object TestPathDefinition extends App with SendsDefaultText {
 
   val pathAndQueries =
     GET("api" / "twoqueries")
-      .query("someint")
-      .query("someMandatoryString")
+      .mandatoryQuery("someint")
+      .mandatoryQuery("someMandatoryString")
 
   pathAndQueries.map { (int, str) =>
     assert(int.isInstanceOf[String])

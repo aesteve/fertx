@@ -1,5 +1,6 @@
-package com.github.aesteve.fertx.dsl.extractors
+package com.github.aesteve.fertx.dsl.query
 
+import com.github.aesteve.fertx.dsl.extractors.Extractor
 import com.github.aesteve.fertx.response.ClientError
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.parameters.Parameter

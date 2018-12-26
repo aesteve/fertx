@@ -9,7 +9,7 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
   "Mandatory query param" should "not be missing" in {
     route =
       GET("api" / "mandatoryparam")
-        .query("mandatoryparam")
+        .mandatoryQuery("mandatoryparam")
         .produces[`text/plain`]
         .map { param =>
           OK(param)
@@ -30,8 +30,8 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
 
     route =
       GET("api" / "mandatoryparams")
-        .query(param1)
-        .query(param2)
+        .mandatoryQuery(param1)
+        .mandatoryQuery(param2)
         .produces[`text/plain`]
         .map { (first, second) =>
           OK(s"$first:$second")

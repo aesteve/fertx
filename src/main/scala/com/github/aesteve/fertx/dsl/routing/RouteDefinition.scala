@@ -1,11 +1,12 @@
 package com.github.aesteve.fertx.dsl.routing
 
- import com.github.aesteve.fertx.dsl.extractors.{Extractor, QueryParamExtractor}
-import com.github.aesteve.fertx.dsl.{StrParam, StrParamOpt}
-import com.github.aesteve.fertx.media.MimeType
-import com.github.aesteve.fertx.request.RequestUnmarshaller
-import com.github.aesteve.fertx.response.ErrorMarshaller
-import com.github.aesteve.fertx.util.TupleOps.Join
+ import com.github.aesteve.fertx.dsl.extractors.Extractor
+ import com.github.aesteve.fertx.dsl.query.{MandatoryQueryParam, OptionalQueryParam, QueryParamExtractor}
+ import com.github.aesteve.fertx.dsl.{StrParam, StrParamOpt}
+ import com.github.aesteve.fertx.media.MimeType
+ import com.github.aesteve.fertx.request.RequestUnmarshaller
+ import com.github.aesteve.fertx.response.ErrorMarshaller
+ import com.github.aesteve.fertx.util.TupleOps.Join
 
 abstract class RouteDefinition[In, RequestMime, ResponseMime]
   extends Extractor[In]
@@ -22,11 +23,17 @@ abstract class RouteDefinition[In, RequestMime, ResponseMime]
   private def _query[P](queryParamExtractor: QueryParamExtractor[P])(implicit join: Join[In, P]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
     lift(queryParamExtractor)(join)
 
-  def query(name: String)(implicit join: Join[In, Tuple1[String]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    _query(StrParam(name))(join)
+  private def query[P](queryParam: MandatoryQueryParam[P])(implicit join: Join[In, Tuple1[P]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
+    _query(queryParam)(join)
+
+  private def query[P](queryParam: OptionalQueryParam[P])(implicit join: Join[In, Tuple1[Option[P]]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
+    _query(queryParam)(join)
+
+  def mandatoryQuery(name: String)(implicit join: Join[In, Tuple1[String]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
+    query(StrParam(name))(join)
 
   def optQuery(name: String)(implicit join: Join[In, Tuple1[Option[String]]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    _query(StrParamOpt(name))(join)
+    query(StrParamOpt(name))(join)
 
   /* Request Body */
   def body[C](implicit unmarshaller: RequestUnmarshaller[RequestMime, C], join: Join[In, Tuple1[C]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =

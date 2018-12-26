@@ -1,16 +1,14 @@
 package com.github.aesteve.fertx
 
-import com.github.aesteve.fertx.dsl.extractors.QueryParamExtractor
 import com.github.aesteve.fertx.dsl.path.{PathFragmentDefinition, _}
+import com.github.aesteve.fertx.dsl.query._
 import com.github.aesteve.fertx.dsl.routing.RouteDefinition
 import com.github.aesteve.fertx.dsl.routing.impl.RouteDefinitionImpl
 import com.github.aesteve.fertx.media._
-import com.github.aesteve.fertx.response.{BadRequest, ClientError, UnitErrorMarshaller}
+import com.github.aesteve.fertx.response.{ClientError, UnitErrorMarshaller}
 import io.swagger.v3.oas.models.media.{IntegerSchema, StringSchema}
-import io.swagger.v3.oas.models.parameters.{Parameter, PathParameter}
+import io.swagger.v3.oas.models.parameters.PathParameter
 import io.vertx.core.http.HttpMethod
-
-import scala.util.Try
 
 package object dsl {
 
@@ -53,25 +51,6 @@ package object dsl {
 
 
   /* Query parameters */
-  private def queryParam: Parameter =
-    new Parameter().in("query")
-
-  class MandatoryQueryParam[T](parameter: Parameter, mapper: String => T) extends QueryParamExtractor[Tuple1[T]](parameter.required(true)) {
-    override def fromReq: Option[String] => Either[ClientError, Tuple1[T]] = {
-      case None => Left(BadRequest(s"Query parameter ${parameter.getName} is missing"))
-      case Some(value) => Try(mapper(value))
-        .fold(_ => Left(BadRequest(s"Cannot read parameter ${parameter.getName}")), mapped => Right(Tuple1(mapped)))
-    }
-  }
-
-  class OptionalQueryParam[T](parameter: Parameter, mapper: String => T) extends QueryParamExtractor[Tuple1[Option[T]]](parameter.required(false)) {
-    override def fromReq: Option[String] => Either[ClientError, Tuple1[Option[T]]] = {
-      case None => Right(Tuple1(None))
-      case Some(value) => Try(mapper(value))
-        .fold(_ => Left(BadRequest(s"Cannot read parameter ${parameter.getName}")), mapped => Right(Tuple1(Some(mapped))))
-    }
-  }
-
   case class StrParam(name: String) extends MandatoryQueryParam[String](queryParam.name(name).schema(new StringSchema), identity)
   case class StrParamOpt(name: String) extends OptionalQueryParam[String](queryParam.name(name).schema(new StringSchema), identity)
   case class IntParam(name: String) extends MandatoryQueryParam[Int](queryParam.name(name).schema(new StringSchema), _.toInt)
