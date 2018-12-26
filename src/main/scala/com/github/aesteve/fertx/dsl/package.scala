@@ -51,9 +51,9 @@ package object dsl {
 
 
   /* Query parameters */
-  case class StrParam(name: String) extends MandatoryQueryParam[String](queryParam.name(name).schema(new StringSchema), identity)
-  case class StrParamOpt(name: String) extends OptionalQueryParam[String](queryParam.name(name).schema(new StringSchema), identity)
-  case class IntParam(name: String) extends MandatoryQueryParam[Int](queryParam.name(name).schema(new StringSchema), _.toInt)
-  case class IntParamOpt(name: String) extends OptionalQueryParam[Int](queryParam.name(name).schema(new IntegerSchema), _.toInt)
+  case class StrParam(name: String) extends MandatoryQueryParamDefinition[String](queryParam.name(name).schema(new StringSchema), identity)
+  case class StrParamOpt(name: String) extends OptionalQueryParamDefinition[String](queryParam.name(name).schema(new StringSchema), identity)
+  case class IntParam(name: String) extends MandatoryQueryParamDefinition[Int](queryParam.name(name).schema(new StringSchema), _.toInt)
+  case class IntParamOpt(name: String) extends OptionalQueryParamDefinition[Int](queryParam.name(name).schema(new IntegerSchema), _.toInt)
 
 }

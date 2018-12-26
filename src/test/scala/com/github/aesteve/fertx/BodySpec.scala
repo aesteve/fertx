@@ -133,7 +133,7 @@ class BodySpec extends FertxTestBase with SendsDefaultText {
       POST("api" / "bodyandparams" / 'id.as[Int])
         .accepts[`text/plain`]
         .produces[`text/plain`]
-        .mandatoryQuery(queryParam)
+        .query(queryParam)
         .body[String]
         .map { (id, query, body) =>
           assert(id.isInstanceOf[Int])
