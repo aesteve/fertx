@@ -14,8 +14,6 @@ import scala.util.Try
 
 package object dsl {
 
-  type QueryParam1[T] = QueryParamExtractor[Tuple1[T]]
-
   /* Request definition */
   def request[T](method: HttpMethod, pathDef: PathDefinition[T]): RouteDefinition[T, Unit, Unit] =
     new RouteDefinitionImpl(method, pathDef, pathDef.extractor, UnitErrorMarshaller)
@@ -55,50 +53,28 @@ package object dsl {
 
 
   /* Query parameters */
-  class Param[T](name: String, fun: Option[String] => Either[ClientError, T], parameter: Parameter) extends QueryParam1[T](name, parameter) {
-    override def fromReq: Option[String] => Either[ClientError, Tuple1[T]] =
-      s => fun(s) match {
-        case Right(value) =>
-          Right(Tuple1(value))
-        case Left(err) =>
-          Left(err)
-      }
-  }
-
   private def queryParam: Parameter =
     new Parameter().in("query")
 
-  case class StrParam(name: String) extends Param[String](name, {
-    case None =>
-      Left(BadRequest(s"Query parameter $name expected"))
-    case Some(value) =>
-      Right(value)
-  }, queryParam.schema(new StringSchema))
-
-  case class StrParamOpt(name: String) extends Param[Option[String]](name,  {
-      case None => Right(None)
-      case Some(value) => Right(Some(value))
-  }, queryParam.schema(new StringSchema))
-
-  case class IntParam(name: String) extends QueryParam1[Int](name, queryParam.schema(new IntegerSchema)) {
-    override def fromReq: Option[String] => Either[ClientError, Tuple1[Int]] =
-      strToInt
-  }
-
-  case class IntParamOpt(name: String) extends QueryParam1[Option[Int]](name, queryParam.schema(new IntegerSchema)) {
-    override def fromReq: Option[String] => Either[ClientError, Tuple1[Option[Int]]] = {
-      case None =>
-        Right(Tuple1(None))
-      case Some(str) =>
-        Try(str.toInt).fold(_ => Left(BadRequest(s"Could not convert $str to Int")), i => Right(Tuple1(Some(i))))
+  class MandatoryQueryParam[T](parameter: Parameter, mapper: String => T) extends QueryParamExtractor[Tuple1[T]](parameter.required(true)) {
+    override def fromReq: Option[String] => Either[ClientError, Tuple1[T]] = {
+      case None => Left(BadRequest(s"Query parameter ${parameter.getName} is missing"))
+      case Some(value) => Try(mapper(value))
+        .fold(_ => Left(BadRequest(s"Cannot read parameter ${parameter.getName}")), mapped => Right(Tuple1(mapped)))
     }
   }
 
-  private def strToInt: Option[String] => Either[ClientError, Tuple1[Int]] = {
-    case None =>
-      Left(BadRequest("Parameter is mandatory"))
-    case Some(str) =>
-      Try(str.toInt).fold(_ => Left(BadRequest(s"Could not convert $str to Int")), i => Right(Tuple1(i)))
+  class OptionalQueryParam[T](parameter: Parameter, mapper: String => T) extends QueryParamExtractor[Tuple1[Option[T]]](parameter.required(false)) {
+    override def fromReq: Option[String] => Either[ClientError, Tuple1[Option[T]]] = {
+      case None => Right(Tuple1(None))
+      case Some(value) => Try(mapper(value))
+        .fold(_ => Left(BadRequest(s"Cannot read parameter ${parameter.getName}")), mapped => Right(Tuple1(Some(mapped))))
+    }
   }
+
+  case class StrParam(name: String) extends MandatoryQueryParam[String](queryParam.name(name).schema(new StringSchema), identity)
+  case class StrParamOpt(name: String) extends OptionalQueryParam[String](queryParam.name(name).schema(new StringSchema), identity)
+  case class IntParam(name: String) extends MandatoryQueryParam[Int](queryParam.name(name).schema(new StringSchema), _.toInt)
+  case class IntParamOpt(name: String) extends OptionalQueryParam[Int](queryParam.name(name).schema(new IntegerSchema), _.toInt)
 
 }

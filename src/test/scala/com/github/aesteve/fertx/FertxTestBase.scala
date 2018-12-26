@@ -9,7 +9,8 @@ import io.vertx.scala.ext.web.client.{HttpRequest, HttpResponse, WebClient, WebC
 import org.scalatest.compatible.Assertion
 import org.scalatest.{Assertions, AsyncFlatSpec, BeforeAndAfter, Matchers}
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 abstract class FertxTestBase extends AsyncFlatSpec with Matchers with Assertions with BeforeAndAfter {
 
@@ -34,7 +35,7 @@ abstract class FertxTestBase extends AsyncFlatSpec with Matchers with Assertions
   }
 
   after {
-    vertx.close()
+    Await.ready(vertx.closeFuture(), 5 seconds)
   }
 
   def startTest(realTest: () => Future[Assertion]): Future[Assertion] = {

@@ -1,13 +1,11 @@
 package com.github.aesteve.fertx.dsl.routing
 
-import com.github.aesteve.fertx.dsl.extractors.{Extractor, QueryParamExtractor}
-import com.github.aesteve.fertx.dsl.{Param, StrParam, StrParamOpt}
+ import com.github.aesteve.fertx.dsl.extractors.{Extractor, QueryParamExtractor}
+import com.github.aesteve.fertx.dsl.{StrParam, StrParamOpt}
 import com.github.aesteve.fertx.media.MimeType
 import com.github.aesteve.fertx.request.RequestUnmarshaller
-import com.github.aesteve.fertx.response.{ClientError, ErrorMarshaller}
+import com.github.aesteve.fertx.response.ErrorMarshaller
 import com.github.aesteve.fertx.util.TupleOps.Join
-import io.swagger.v3.oas.models.media.Schema
-import io.swagger.v3.oas.models.parameters.QueryParameter
 
 abstract class RouteDefinition[In, RequestMime, ResponseMime]
   extends Extractor[In]
@@ -23,9 +21,6 @@ abstract class RouteDefinition[In, RequestMime, ResponseMime]
   /* Query parameters */
   def query[P](queryParamExtractor: QueryParamExtractor[P])(implicit join: Join[In, P]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
     lift(queryParamExtractor)(join)
-
-  def query[P](name: String, fun: Option[String] => Either[ClientError, P], schema: Schema[P])(implicit join: Join[In, Tuple1[P]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    query(new Param[P](name, fun, new QueryParameter().schema(schema)))(join)
 
   def query(name: String)(implicit join: Join[In, Tuple1[String]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
     query(StrParam(name))(join)
