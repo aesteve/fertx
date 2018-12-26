@@ -19,14 +19,14 @@ abstract class RouteDefinition[In, RequestMime, ResponseMime]
   def lift[C](other: Extractor[C])(implicit join: Join[In, C]): RouteDefinition[join.Out, RequestMime, ResponseMime]
 
   /* Query parameters */
-  def query[P](queryParamExtractor: QueryParamExtractor[P])(implicit join: Join[In, P]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
+  private def _query[P](queryParamExtractor: QueryParamExtractor[P])(implicit join: Join[In, P]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
     lift(queryParamExtractor)(join)
 
   def query(name: String)(implicit join: Join[In, Tuple1[String]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    query(StrParam(name))(join)
+    _query(StrParam(name))(join)
 
   def optQuery(name: String)(implicit join: Join[In, Tuple1[Option[String]]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
-    query(StrParamOpt(name))(join)
+    _query(StrParamOpt(name))(join)
 
   /* Request Body */
   def body[C](implicit unmarshaller: RequestUnmarshaller[RequestMime, C], join: Join[In, Tuple1[C]]): RouteDefinition[join.Out, RequestMime, ResponseMime] =
