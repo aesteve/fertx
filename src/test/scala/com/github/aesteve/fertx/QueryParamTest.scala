@@ -130,4 +130,54 @@ class QueryParamTest extends FertxTestBase with SendsDefaultText {
     }
   }
 
+  "Providing an example" should "be possible on mandatory param" in {
+
+    val expected = "some-value"
+
+    route =
+      GET("api" / "param" / "example")
+        .query("queryparam".eg("Some example"))
+        .produces[`text/plain`]
+        .map { param =>
+          OK(param)
+        }
+
+    startTest { () =>
+      get("/api/param/example")
+        .addQueryParam("queryparam", expected)
+        .sendFuture()
+        .map { resp =>
+          resp.statusCode() should be(200)
+          resp.bodyAsString() shouldEqual Some(expected)
+        }
+    }
+  }
+
+  "Providing an example" should "be possible on optional param" in {
+
+    val expected = "some-value"
+
+    route =
+      GET("api" / "param" / "example" / "optional")
+        .query("queryparam".?.eg("Some example"))
+        .produces[`text/plain`]
+        .map {
+          case Some(s) => OK(s)
+          case None => NotFound
+        }
+
+    startTest { () =>
+      get("/api/param/example/optional")
+        .addQueryParam("queryparam", expected)
+        .sendFuture()
+        .flatMap { resp =>
+          resp.statusCode() should be(200)
+          resp.bodyAsString() shouldEqual Some(expected)
+
+          getNow("/api/param/example/optional").map { resp2 =>
+            resp2.statusCode() should be(404)
+          }
+        }
+    }
+  }
 }

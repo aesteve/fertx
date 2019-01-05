@@ -17,6 +17,9 @@ package object query {
     def as[R](implicit schema: Schema[R], newMapper: Tuple1[T] => R): OptionQueryParam[R] =
       new OptionQueryParam[R](parameter.schema(schema), str => newMapper(Tuple1(mapper(str))))
 
+    def eg(example: String): OptionQueryParam[T] =
+      new OptionQueryParam[T](parameter.example(example), mapper)
+
     override def fromReq: Option[String] => Either[ClientError, Tuple1[Option[T]]] = {
       case None => Right(Tuple1(None))
       case Some(value) => Try(mapper(value))
@@ -39,6 +42,9 @@ package object query {
       case Some(value) => Try(mapper(value))
         .fold(_ => Left(BadRequest(s"Cannot read parameter ${parameter.getName}")), mapped => Right(Tuple1(mapped)))
     }
+
+    def eg(example: String): QueryParam[T] =
+      new QueryParam[T](parameter.example(example), mapper)
 
   }
 
