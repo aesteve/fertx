@@ -55,7 +55,7 @@ And indeed, what should a `Todo` instance look like once sent to `text/plain` ?
 
 ```scala
 case class Todo(id: Int)
-// you've defined a proper way to marshall a Todo instance to plain text
+// you'll define a proper way to marshall a Todo instance to plain text
 implicit val todoTextWriter = new ResponseMarshaller[`text/plain`, Todo] {
   override def handle(todo: Todo, resp: HttpServerResponse): Unit =
     resp.end(todo.id.toString)
@@ -79,7 +79,7 @@ The same way, we have to define a ``RequestUnmarshaller[`text/plain`, Todo]``.
 ```scala
 case class Todo(id: Int)
 implicit val todoStrUnmarshaller = new RequestUnmarshaller[`text/plain`, Todo] {
-  override def extract(rc: RoutingContext): Either[MalformedBody, Payload] =
+  override def extract(rc: RoutingContext): Either[MalformedBody, Todo] =
     try {
       Right(rc.getBodyAsString.get.toInt)
     } catch {
