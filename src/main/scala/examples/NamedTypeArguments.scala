@@ -1,3 +1,4 @@
+package examples
 
 /**
   * Named Type Arguments: https://dotty.epfl.ch/docs/reference/other-new-features/named-typeargs.html

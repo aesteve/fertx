@@ -1,4 +1,4 @@
-import scala.language.implicitConversions
+package examples
 
 /**
   *  Conversions: http://dotty.epfl.ch/docs/reference/contextual/conversions.html

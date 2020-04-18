@@ -1,3 +1,5 @@
+package examples
+
 /**
   * Enum Types: http://dotty.epfl.ch/docs/reference/enums/adts.html
   */

@@ -1,4 +1,4 @@
-import scala.language.strictEquality
+package examples
 
 /**
   * Multiversal Equality: https://dotty.epfl.ch/docs/reference/contextual/multiversal-equality.html

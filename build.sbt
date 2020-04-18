@@ -1,9 +1,13 @@
 lazy val root = project
   .in(file("."))
   .settings(
-    name := "dotty-example-project",
-    description := "Example sbt project that compiles using Dotty",
-    version := "0.1.0",
-
-    scalaVersion := "0.23.0-RC1"
+    name := "fertx",
+    description := "Using Vert.x and dotty in a functional way",
+    version := "0.0.1",
+    scalaVersion := dottyLatestNightlyBuild.get
   )
+scalacOptions ++= Seq(
+  "-language:implicitConversions"
+)
+// Waiting for Vert.x to be published with Scala 2.13 (4.0.0 ?)
+// libraryDependencies += ("io.vertx" %% "vertx-web-scala" % "4.0.0").withDottyCompat(scalaVersion.value)

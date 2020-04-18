@@ -1,3 +1,5 @@
+package examples
+
 /**
   * Intersection Types: https://dotty.epfl.ch/docs/reference/new-types/intersection-types.html
   */

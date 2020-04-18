@@ -1,3 +1,5 @@
+package examples
+
 import scala.util.{Success, Try}
 
 /**

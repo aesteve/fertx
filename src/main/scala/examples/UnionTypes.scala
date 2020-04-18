@@ -1,3 +1,5 @@
+package examples
+
 /**
   * Union Types: https://dotty.epfl.ch/docs/reference/new-types/union-types.html
   */

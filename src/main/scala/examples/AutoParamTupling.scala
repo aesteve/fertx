@@ -1,3 +1,4 @@
+package examples
 
 /**
   * Automatic Tupling of Function Params: https://dotty.epfl.ch/docs/reference/other-new-features/auto-parameter-tupling.html

@@ -1,3 +1,4 @@
+package examples
 
 object Main {
 
