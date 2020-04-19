@@ -11,3 +11,4 @@ enum FError(val status: Int, val message: Option[String]) {
       case None => Some(t.getMessage)
     })
 }
+def badRequest(msg: String) = FError.WithMessage(400, msg)

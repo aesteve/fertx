@@ -9,7 +9,7 @@ import io.vertx.ext.web.{Route, Router}
 import scala.util.Try
 
 class FRouteWithPayload[Error <: HttpError, Payload](vertxSupplier: Router => Route, handler: RequestExtractor[Error, Payload]) extends FRoute[Error, Payload] {
-  def flatMap[Left <: HttpError, T](f: Payload => Either[Left, T]): FRoute[Error | Left, T] = {
+  override def flatMap[Left <: HttpError, T](f: Payload => Either[Left, T]): FRoute[Error | Left, T] = {
     new FRouteWithPayload(vertxSupplier, { request =>
       handler(request) match {
         case Left(error) => Left(error)
@@ -18,14 +18,14 @@ class FRouteWithPayload[Error <: HttpError, Payload](vertxSupplier: Router => Ro
     })
   }
 
-  def seal(errorHandler: Marshaller[Error], writer: Marshaller[Payload]): Request => Response = { request =>
+  override def seal(errorHandler: Marshaller[Error], writer: Marshaller[Payload]): Request => Response = { request =>
     handler(request) match {
       case Left(error) => errorHandler(error)
       case Right(payload) => writer(payload)
     }
   }
   
-  def join[E <: HttpError, P](other: RequestExtractor[E, P])(using joiner: CanJoin[Payload, P]): FRouteWithPayload[Error | E, joiner.Joined] = {
+  override def and[E <: HttpError, P](other: RequestExtractor[E, P])(using joiner: CanJoin[Payload, P]): FRouteWithPayload[Error | E, joiner.Joined] = {
     new FRouteWithPayload(vertxSupplier, { request =>
       handler(request) match {
         case Left(error) => Left(error)
@@ -38,12 +38,12 @@ class FRouteWithPayload[Error <: HttpError, Payload](vertxSupplier: Router => Ro
   }
   
   def join[P](fromRequest: Request => String, converter: Conversion[String, P], msg: Option[String])(using joiner: CanJoin[Payload, P]): FRouteWithPayload[Error | HttpError, joiner.Joined] = 
-    join({ request =>
+    and({ request =>
       Try(converter(fromRequest(request)))
         .orHttpError(400, msg)
     })
   
-  def query[P](name: String, converter: Conversion[String, P])(using joiner: CanJoin[Payload, P]) = join(_.getParam(name), converter, Some(s"$name query parameter is invalid"))
+  def query[P](name: String, converter: Conversion[String, P])(using joiner: CanJoin[Payload, P]) = and(_.getParam(name), converter, Some(s"$name query parameter is invalid"))
 
 }
 

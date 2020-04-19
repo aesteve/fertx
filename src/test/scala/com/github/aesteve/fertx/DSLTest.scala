@@ -1,9 +1,9 @@
 package com.github.aesteve.fertx
 
-import com.github.aesteve.fertx.DSL.{_, given _}
+import com.github.aesteve.fertx.DSL._
 import com.github.aesteve.fertx.http.{FError, HttpError, Request, Response}
 import com.github.aesteve.fertx.http.routing.PathDef
-import com.github.aesteve.fertx.http.routing.Params.Path
+import com.github.aesteve.fertx.http.routing.Params.{Path, Query}
 
 
 class DSLTest {
@@ -12,6 +12,6 @@ class DSLTest {
   val pureGet: Request => Response = GET("something")
   val apiGet: Request => Response = GET[Nothing, Unit]("api" / "v1")
   val apiGetParam = GET[HttpError, (Int, Int)]( "api" / "v1" / Path.int("param1") / "something" / Path.int("param2"))
-    // .queryPa
-    .map { _ + _ }
+    .and(Query.int("queryparam"))
+    .map { _ + _ + _ }
 }
